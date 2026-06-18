@@ -34,10 +34,12 @@ export async function createBooth(formData: FormData) {
     updatedAt: now,
   };
 
+  const shopName = isEat ? (formData.get("shopName") as string) : "";
   const extra = isEat
     ? {
         type: formData.get("type") as string,
-        shopName: formData.get("shopName") as string,
+        name: shopName,
+        shopName,
         location: formData.get("location") as string,
         imageUrl: formData.get("imageUrl") as string,
         products: [],
@@ -70,9 +72,11 @@ export async function updateBooth(boothId: string, formData: FormData) {
   const now = nowTimestamp();
   const category = formData.get("category") as string;
   const isEat = category === "eat";
+  const shopName = isEat ? (formData.get("shopName") as string) : "";
   const fields = isEat
     ? {
-        shopName: formData.get("shopName") as string,
+        name: shopName,
+        shopName,
         location: formData.get("location") as string,
         imageUrl: formData.get("imageUrl") as string,
         status: Number(formData.get("status") ?? 1),

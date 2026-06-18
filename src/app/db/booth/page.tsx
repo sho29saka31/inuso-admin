@@ -43,7 +43,7 @@ export default async function BoothListPage() {
               className="bg-surface rounded-lg border p-4 flex items-start justify-between gap-4"
             >
               <div className="flex flex-col gap-1">
-                <span className="font-medium text-sm">{b.name}</span>
+                <span className="font-medium text-sm">{b.name ?? b.shopName}</span>
                 <span className="text-xs text-text-sub">{b.boothId} / {b.location}</span>
                 <span className="text-xs">
                   状態:{" "}
@@ -58,7 +58,7 @@ export default async function BoothListPage() {
                 >
                   編集
                 </Link>
-                <DeleteButton boothId={b.boothId} name={b.name} action={deleteBooth} />
+                <DeleteButton boothId={b.boothId} name={b.name ?? b.shopName} action={deleteBooth} />
               </div>
             </div>
           ))}
