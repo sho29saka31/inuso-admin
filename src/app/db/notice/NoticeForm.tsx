@@ -36,6 +36,13 @@ const AUTHOR_OPTIONS = [
   { value: "__other__", label: "その他" },
 ];
 
+const TYPE_OPTIONS = [
+  { value: "urgent", label: "緊急" },
+  { value: "info", label: "お知らせ" },
+  { value: "warning", label: "注意" },
+  { value: "other", label: "その他" },
+];
+
 interface NoticeFormProps {
   action: (formData: FormData) => Promise<void>;
   defaultValues?: {
@@ -43,7 +50,7 @@ interface NoticeFormProps {
     title?: string;
     body?: string;
     target?: string;
-    isUrgent?: boolean;
+    type?: string;
   };
   isEdit?: boolean;
 }
@@ -54,12 +61,11 @@ function guessAuthorSelect(authorId?: string): string {
     (o) => o.value === authorId && o.value !== "__teacher__" && o.value !== "__other__"
   );
   if (fixed) return fixed.value;
-  // Could be teacher name or other free text
   return "__other__";
 }
 
 export function NoticeForm({ action, defaultValues = {}, isEdit = false }: NoticeFormProps) {
-  const [isUrgent, setIsUrgent] = useState(defaultValues.isUrgent ?? false);
+  const [noticeType, setNoticeType] = useState(defaultValues.type ?? "info");
   const [pending, setPending] = useState(false);
   const [authorSelect, setAuthorSelect] = useState(() => guessAuthorSelect(defaultValues.authorId));
   const [teacherName, setTeacherName] = useState(
@@ -72,6 +78,7 @@ export function NoticeForm({ action, defaultValues = {}, isEdit = false }: Notic
   const isTeacher = authorSelect === "__teacher__";
   const isOther = authorSelect === "__other__";
   const targets = isTeacher ? ALL_TARGETS : NON_TEACHER_TARGETS;
+  const isUrgent = noticeType === "urgent";
 
   function resolvedAuthorId(): string {
     if (isTeacher) return teacherName;
@@ -89,7 +96,7 @@ export function NoticeForm({ action, defaultValues = {}, isEdit = false }: Notic
     }
     setPending(true);
     const fd = new FormData(e.currentTarget);
-    fd.set("isUrgent", isUrgent ? "true" : "false");
+    fd.set("type", noticeType);
     fd.set("authorId", resolvedAuthorId());
     await action(fd);
     setPending(false);
@@ -148,21 +155,22 @@ export function NoticeForm({ action, defaultValues = {}, isEdit = false }: Notic
         )}
       </label>
 
-      <label className="flex items-center gap-2 cursor-pointer">
-        <input
-          type="checkbox"
-          checked={isUrgent}
-          onChange={(e) => setIsUrgent(e.target.checked)}
-          className="rounded"
-        />
-        <span className="text-sm font-medium">
-          緊急通知 <span className="text-xs text-warning">（2段階確認あり）</span>
-        </span>
-      </label>
+      <div className="flex flex-col gap-1">
+        <span className="text-sm font-medium">通知種別</span>
+        <select
+          value={noticeType}
+          onChange={(e) => setNoticeType(e.target.value)}
+          className="border rounded-lg px-3 py-2 text-sm"
+        >
+          {TYPE_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value}>{o.label}</option>
+          ))}
+        </select>
+      </div>
 
       {isUrgent && (
         <div className="bg-red-50 border border-danger rounded p-3 text-xs text-danger">
-          緊急通知は全対象に優先的に配信されます。誤送信に注意してください。
+          緊急通知は全対象に優先的に配信されます。誤送信に注意してください。（2段階確認あり）
         </div>
       )}
 

@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { authorId, title, body, target, isUrgent, sendPush } = await req.json();
+  const { authorId, title, body, target, type } = await req.json();
   if (!authorId || !title || !body) {
     return NextResponse.json({ error: "authorId, title, body required" }, { status: 400 });
   }
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     title,
     body,
     target: target ?? "all",
-    isUrgent: Boolean(isUrgent),
+    type: type ?? "info",
     createdAt: now,
   };
 
@@ -38,17 +38,15 @@ export async function POST(req: NextRequest) {
     changedFields: data,
   });
 
-  if (sendPush) {
-    try {
-      const messaging = getMessaging();
-      await messaging.send({
-        topic: target ?? "all",
-        notification: { title, body },
-        data: { noticeId, isUrgent: String(Boolean(isUrgent)) },
-      });
-    } catch (err) {
-      console.error("FCM send error:", err);
-    }
+  try {
+    const messaging = getMessaging();
+    await messaging.send({
+      topic: target ?? "all",
+      notification: { title, body },
+      data: { noticeId, type: type ?? "info" },
+    });
+  } catch (err) {
+    console.error("FCM send error:", err);
   }
 
   const viewerUrl = process.env.VIEWER_REVALIDATE_URL;
