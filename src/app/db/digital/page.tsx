@@ -54,13 +54,13 @@ export default async function DigitalPage() {
             />
           </label>
 
-          {data.pdfUrl && (
+          {!!data.pdfUrl && (
             <div className="bg-surface border rounded-lg p-3 text-xs text-text-sub break-all">
-              現在: {data.pdfUrl as string}
+              現在: {String(data.pdfUrl)}
             </div>
           )}
 
-          {data.updatedAt && (
+          {!!data.updatedAt && (
             <p className="text-xs text-text-sub">最終更新: {(data.updatedAt as { display: string }).display}</p>
           )}
 
