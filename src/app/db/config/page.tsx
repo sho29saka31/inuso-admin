@@ -42,7 +42,7 @@ async function saveConfig(formData: FormData) {
     targetCollection: "config",
     targetId: "bluetooth",
     changeType: "update",
-    changedFields: fields,
+    changedFields: fields as unknown as Record<string, unknown>,
   });
   revalidatePath("/db/config");
 }
