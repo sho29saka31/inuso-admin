@@ -4,22 +4,32 @@ import { redirect } from "next/navigation";
 import { getDb, nowTimestamp } from "@/lib/firebase-admin";
 import { saveChangeLog } from "@/lib/changelog";
 
-export async function createEatItem(type: "car" | "pta", formData: FormData) {
+function parseProducts(formData: FormData) {
+  const products: { name: string; price: number }[] = [];
+  let i = 0;
+  while (formData.has(`product_name_${i}`)) {
+    const name = (formData.get(`product_name_${i}`) as string).trim();
+    const price = Number(formData.get(`product_price_${i}`) ?? 0);
+    if (name) products.push({ name, price });
+    i++;
+  }
+  return products;
+}
+
+export async function createEatItem(formData: FormData) {
   const db = getDb();
   const now = nowTimestamp();
-  const id = type === "pta" ? "eat-pta" : `eat-car-${Date.now()}`;
+  const type = formData.get("type") as "car" | "pta";
+  const id = type === "pta" ? `eat-pta-${Date.now()}` : `eat-car-${Date.now()}`;
   const data = {
     boothId: id,
     category: "eat",
-    name: formData.get("name") as string,
-    location: formData.get("location") as string,
-    description: formData.get("description") as string,
-    boothImage: formData.get("boothImage") as string,
+    type,
+    shopName: formData.get("shopName") as string,
+    instagramUrl: formData.get("instagramUrl") as string,
+    products: parseProducts(formData),
+    imageUrl: formData.get("imageUrl") as string,
     status: Number(formData.get("status") ?? 1),
-    waitCount: 0,
-    mode: "manual",
-    bluetoothData: null,
-    threshold: null,
     updatedAt: now,
   };
 
@@ -29,20 +39,20 @@ export async function createEatItem(type: "car" | "pta", formData: FormData) {
     targetCollection: "booths",
     targetId: id,
     changeType: "create",
-    changedFields: { created: data },
+    changedFields: { created: data as unknown as Record<string, unknown> },
   });
 
-  redirect(`/db/eat/${type}`);
+  redirect("/db/eat");
 }
 
-export async function updateEatItem(boothId: string, type: "car" | "pta", formData: FormData) {
+export async function updateEatItem(boothId: string, formData: FormData) {
   const db = getDb();
   const now = nowTimestamp();
   const fields = {
-    name: formData.get("name") as string,
-    location: formData.get("location") as string,
-    description: formData.get("description") as string,
-    boothImage: formData.get("boothImage") as string,
+    shopName: formData.get("shopName") as string,
+    instagramUrl: formData.get("instagramUrl") as string,
+    products: parseProducts(formData),
+    imageUrl: formData.get("imageUrl") as string,
     status: Number(formData.get("status") ?? 1),
     updatedAt: now,
   };
@@ -53,13 +63,13 @@ export async function updateEatItem(boothId: string, type: "car" | "pta", formDa
     targetCollection: "booths",
     targetId: boothId,
     changeType: "update",
-    changedFields: fields,
+    changedFields: fields as unknown as Record<string, unknown>,
   });
 
-  redirect(`/db/eat/${type}`);
+  redirect("/db/eat");
 }
 
-export async function deleteEatItem(boothId: string, type: "car" | "pta") {
+export async function deleteEatItem(boothId: string) {
   const db = getDb();
   await db.collection("booths").doc(boothId).delete();
   await saveChangeLog({
@@ -69,5 +79,5 @@ export async function deleteEatItem(boothId: string, type: "car" | "pta") {
     changeType: "delete",
     changedFields: {},
   });
-  redirect(`/db/eat/${type}`);
+  redirect("/db/eat");
 }

@@ -7,8 +7,7 @@ import { logoutAction } from "./actions";
 const NAV_ITEMS = [
   { href: "/db/booth", label: "ブース" },
   { href: "/db/event", label: "イベント" },
-  { href: "/db/eat/car", label: "キッチンカー" },
-  { href: "/db/eat/pta", label: "PTAバザー" },
+  { href: "/db/eat", label: "飲食" },
   { href: "/db/notice", label: "通知" },
   { href: "/db/digital", label: "パンフレット" },
   { href: "/db/config", label: "設定" },
