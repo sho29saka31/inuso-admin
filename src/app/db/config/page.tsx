@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { getDb, nowTimestamp } from "@/lib/firebase-admin";
 import { saveChangeLog } from "@/lib/changelog";
 import { revalidatePath } from "next/cache";

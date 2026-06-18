@@ -9,28 +9,13 @@ interface Product {
 
 interface EatFormProps {
   action: (formData: FormData) => Promise<void>;
-  showTypeSelect?: boolean;
-  defaultType?: "car" | "pta";
   defaultValues?: {
-    shopName?: string;
-    instagramUrl?: string;
     products?: Product[];
-    imageUrl?: string;
-    status?: number;
+    instagramUrl?: string;
   };
-  isEdit?: boolean;
 }
 
-const STATUS_OPTIONS = [
-  { value: 0, label: "0 停止中" },
-  { value: 1, label: "1 非常に閑散" },
-  { value: 2, label: "2 閑散" },
-  { value: 3, label: "3 通常" },
-  { value: 4, label: "4 混雑" },
-  { value: 5, label: "5 非常に混雑" },
-];
-
-export function EatForm({ action, showTypeSelect = false, defaultType = "car", defaultValues = {}, isEdit = false }: EatFormProps) {
+export function EatForm({ action, defaultValues = {} }: EatFormProps) {
   const [pending, setPending] = useState(false);
   const [products, setProducts] = useState<Product[]>(
     defaultValues.products && defaultValues.products.length > 0
@@ -54,7 +39,7 @@ export function EatForm({ action, showTypeSelect = false, defaultType = "car", d
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!confirm(isEdit ? "変更を保存しますか？" : "作成しますか？")) return;
+    if (!confirm("変更を保存しますか？")) return;
     setPending(true);
     const fd = new FormData(e.currentTarget);
     products.forEach((p, i) => {
@@ -67,24 +52,15 @@ export function EatForm({ action, showTypeSelect = false, defaultType = "car", d
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-      {showTypeSelect && (
-        <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium">種別 <span className="text-danger">*</span></span>
-          <select name="type" defaultValue={defaultType} className="border rounded-lg px-3 py-2 text-sm">
-            <option value="car">キッチンカー</option>
-            <option value="pta">PTAバザー</option>
-          </select>
-        </label>
-      )}
-
-      <label className="flex flex-col gap-1">
-        <span className="text-sm font-medium">店名 <span className="text-danger">*</span></span>
-        <input name="shopName" defaultValue={defaultValues.shopName ?? ""} required className="border rounded-lg px-3 py-2 text-sm" />
-      </label>
-
       <label className="flex flex-col gap-1">
         <span className="text-sm font-medium">公式インスタアドレス</span>
-        <input name="instagramUrl" defaultValue={defaultValues.instagramUrl ?? ""} type="url" placeholder="https://www.instagram.com/..." className="border rounded-lg px-3 py-2 text-sm" />
+        <input
+          name="instagramUrl"
+          defaultValue={defaultValues.instagramUrl ?? ""}
+          type="url"
+          placeholder="https://www.instagram.com/..."
+          className="border rounded-lg px-3 py-2 text-sm"
+        />
       </label>
 
       <div className="flex flex-col gap-2">
@@ -122,24 +98,10 @@ export function EatForm({ action, showTypeSelect = false, defaultType = "car", d
         ))}
       </div>
 
-      <label className="flex flex-col gap-1">
-        <span className="text-sm font-medium">画像URL</span>
-        <input name="imageUrl" defaultValue={defaultValues.imageUrl ?? ""} type="url" className="border rounded-lg px-3 py-2 text-sm" />
-      </label>
-
-      <label className="flex flex-col gap-1">
-        <span className="text-sm font-medium">混雑状況</span>
-        <select name="status" defaultValue={defaultValues.status ?? 1} className="border rounded-lg px-3 py-2 text-sm">
-          {STATUS_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>{o.label}</option>
-          ))}
-        </select>
-      </label>
-
       <div className="flex gap-3 mt-2">
         <a href="/db/eat" className="flex-1 text-center py-2 rounded-lg border text-sm">キャンセル</a>
         <button type="submit" disabled={pending} className="flex-1 py-2 rounded-lg bg-primary text-white font-bold text-sm disabled:opacity-60">
-          {pending ? "保存中…" : isEdit ? "保存" : "作成"}
+          {pending ? "保存中…" : "保存"}
         </button>
       </div>
     </form>

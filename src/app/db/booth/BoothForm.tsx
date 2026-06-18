@@ -9,16 +9,28 @@ const CATEGORIES = [
   { value: "act", label: "有志" },
 ];
 
+const STATUS_OPTIONS = [
+  { value: 0, label: "0 停止中" },
+  { value: 1, label: "1 非常に閑散" },
+  { value: 2, label: "2 閑散" },
+  { value: 3, label: "3 通常" },
+  { value: 4, label: "4 混雑" },
+  { value: 5, label: "5 非常に混雑" },
+];
+
 interface BoothFormProps {
   action: (formData: FormData) => Promise<void>;
   defaultValues?: {
     boothId?: string;
     category?: string;
     name?: string;
+    shopName?: string;
     location?: string;
     description?: string;
     boothImage?: string;
+    imageUrl?: string;
     status?: number;
+    type?: string;
   };
   isEdit?: boolean;
 }
@@ -27,13 +39,7 @@ export function BoothForm({ action, defaultValues = {}, isEdit = false }: BoothF
   const [category, setCategory] = useState(defaultValues.category ?? "class");
   const [pending, setPending] = useState(false);
 
-  function generateBoothId(cat: string, name: string) {
-    if (cat === "class") return "";
-    if (cat === "club") return `club-${name.toLowerCase().replace(/\s+/g, "-")}`;
-    if (cat === "eat") return `eat-car-1`;
-    if (cat === "act") return `act-${name.toLowerCase().replace(/\s+/g, "-")}`;
-    return "";
-  }
+  const isEat = category === "eat";
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -46,12 +52,11 @@ export function BoothForm({ action, defaultValues = {}, isEdit = false }: BoothF
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-      {!isEdit && (
+      {!isEdit && !isEat && (
         <div className="bg-blue-50 border border-blue-200 rounded p-3 text-xs text-blue-800">
           <p className="font-medium mb-1">boothId 命名規則</p>
-          <p>クラス: class&#123;grade&#125;&#123;num&#125; 例) class1-1</p>
+          <p>クラス: class&#123;grade&#125;-&#123;num&#125; 例) class1-1</p>
           <p>部活: club-&#123;name&#125; 例) club-art</p>
-          <p>飲食: eat-car-&#123;num&#125; or eat-pta</p>
           <p>有志: act-&#123;name&#125;</p>
         </div>
       )}
@@ -74,7 +79,8 @@ export function BoothForm({ action, defaultValues = {}, isEdit = false }: BoothF
           name="category"
           value={category}
           onChange={(e) => setCategory(e.target.value)}
-          className="border rounded-lg px-3 py-2 text-sm"
+          disabled={isEdit}
+          className="border rounded-lg px-3 py-2 text-sm disabled:bg-gray-100"
         >
           {CATEGORIES.map((c) => (
             <option key={c.value} value={c.value}>{c.label}</option>
@@ -82,62 +88,119 @@ export function BoothForm({ action, defaultValues = {}, isEdit = false }: BoothF
         </select>
       </label>
 
-      <label className="flex flex-col gap-1">
-        <span className="text-sm font-medium">ブース名 <span className="text-danger">*</span></span>
-        <input
-          name="name"
-          defaultValue={defaultValues.name ?? ""}
-          required
-          className="border rounded-lg px-3 py-2 text-sm"
-          placeholder="例: 1年1組 △△△"
-        />
-      </label>
+      {isEat ? (
+        <>
+          <label className="flex flex-col gap-1">
+            <span className="text-sm font-medium">種別 <span className="text-danger">*</span></span>
+            <select
+              name="type"
+              defaultValue={defaultValues.type ?? "car"}
+              disabled={isEdit}
+              className="border rounded-lg px-3 py-2 text-sm disabled:bg-gray-100"
+            >
+              <option value="car">キッチンカー</option>
+              <option value="pta">PTAバザー</option>
+            </select>
+          </label>
 
-      <label className="flex flex-col gap-1">
-        <span className="text-sm font-medium">場所 <span className="text-danger">*</span></span>
-        <input
-          name="location"
-          defaultValue={defaultValues.location ?? ""}
-          required
-          className="border rounded-lg px-3 py-2 text-sm"
-          placeholder="例: A棟2階 1-1教室"
-        />
-      </label>
+          <label className="flex flex-col gap-1">
+            <span className="text-sm font-medium">店名 <span className="text-danger">*</span></span>
+            <input
+              name="shopName"
+              defaultValue={defaultValues.shopName ?? ""}
+              required
+              className="border rounded-lg px-3 py-2 text-sm"
+              placeholder="例: ○○キッチンカー"
+            />
+          </label>
 
-      <label className="flex flex-col gap-1">
-        <span className="text-sm font-medium">説明</span>
-        <textarea
-          name="description"
-          defaultValue={defaultValues.description ?? ""}
-          rows={3}
-          className="border rounded-lg px-3 py-2 text-sm resize-none"
-          placeholder="発表内容の説明"
-        />
-      </label>
+          <label className="flex flex-col gap-1">
+            <span className="text-sm font-medium">場所 <span className="text-danger">*</span></span>
+            <input
+              name="location"
+              defaultValue={defaultValues.location ?? "昇降口"}
+              required
+              className="border rounded-lg px-3 py-2 text-sm"
+            />
+          </label>
 
-      <label className="flex flex-col gap-1">
-        <span className="text-sm font-medium">画像URL</span>
-        <input
-          name="boothImage"
-          defaultValue={defaultValues.boothImage ?? ""}
-          type="url"
-          className="border rounded-lg px-3 py-2 text-sm"
-          placeholder="https://..."
-        />
-      </label>
+          <label className="flex flex-col gap-1">
+            <span className="text-sm font-medium">画像URL</span>
+            <input
+              name="imageUrl"
+              defaultValue={defaultValues.imageUrl ?? ""}
+              type="url"
+              className="border rounded-lg px-3 py-2 text-sm"
+              placeholder="https://..."
+            />
+          </label>
 
-      {isEdit && (
-        <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium">状態</span>
-          <select name="status" defaultValue={defaultValues.status ?? 1} className="border rounded-lg px-3 py-2 text-sm">
-            <option value={0}>0 停止中</option>
-            <option value={1}>1 非常に閑散</option>
-            <option value={2}>2 閑散</option>
-            <option value={3}>3 通常</option>
-            <option value={4}>4 混雑</option>
-            <option value={5}>5 非常に混雑</option>
-          </select>
-        </label>
+          <label className="flex flex-col gap-1">
+            <span className="text-sm font-medium">状態</span>
+            <select name="status" defaultValue={defaultValues.status ?? 1} className="border rounded-lg px-3 py-2 text-sm">
+              {STATUS_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
+            </select>
+          </label>
+        </>
+      ) : (
+        <>
+          <label className="flex flex-col gap-1">
+            <span className="text-sm font-medium">ブース名 <span className="text-danger">*</span></span>
+            <input
+              name="name"
+              defaultValue={defaultValues.name ?? ""}
+              required
+              className="border rounded-lg px-3 py-2 text-sm"
+              placeholder="例: 1年1組 △△△"
+            />
+          </label>
+
+          <label className="flex flex-col gap-1">
+            <span className="text-sm font-medium">場所 <span className="text-danger">*</span></span>
+            <input
+              name="location"
+              defaultValue={defaultValues.location ?? ""}
+              required
+              className="border rounded-lg px-3 py-2 text-sm"
+              placeholder="例: A棟2階 1-1教室"
+            />
+          </label>
+
+          <label className="flex flex-col gap-1">
+            <span className="text-sm font-medium">説明</span>
+            <textarea
+              name="description"
+              defaultValue={defaultValues.description ?? ""}
+              rows={3}
+              className="border rounded-lg px-3 py-2 text-sm resize-none"
+              placeholder="発表内容の説明"
+            />
+          </label>
+
+          <label className="flex flex-col gap-1">
+            <span className="text-sm font-medium">画像URL</span>
+            <input
+              name="boothImage"
+              defaultValue={defaultValues.boothImage ?? ""}
+              type="url"
+              className="border rounded-lg px-3 py-2 text-sm"
+              placeholder="https://..."
+            />
+          </label>
+
+          {isEdit && (
+            <label className="flex flex-col gap-1">
+              <span className="text-sm font-medium">状態</span>
+              <select name="status" defaultValue={defaultValues.status ?? 1} className="border rounded-lg px-3 py-2 text-sm">
+                {STATUS_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </select>
+            </label>
+          )}
+        </>
       )}
 
       <div className="flex gap-3 mt-2">

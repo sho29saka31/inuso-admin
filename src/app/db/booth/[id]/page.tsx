@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { notFound } from "next/navigation";
 import { getDb } from "@/lib/firebase-admin";
 import { BoothForm } from "../BoothForm";
@@ -37,10 +38,13 @@ export default async function BoothEditPage({
           boothId: booth.boothId as string,
           category: booth.category as string,
           name: booth.name as string,
+          shopName: booth.shopName as string,
           location: booth.location as string,
           description: booth.description as string,
           boothImage: booth.boothImage as string,
+          imageUrl: booth.imageUrl as string,
           status: booth.status as number,
+          type: booth.type as string,
         }}
       />
     </div>
