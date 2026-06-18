@@ -25,11 +25,19 @@ export function DbShell({ children }: { children: React.ReactNode }) {
             <Link href="/db/booth" className="font-bold text-base">
               ISF DB管理
             </Link>
-            <form action={logoutAction}>
-              <button type="submit" className="text-sm opacity-80 hover:opacity-100">
-                ログアウト
-              </button>
-            </form>
+            <div className="flex items-center gap-3">
+              <Link href="/db/changelog" className="text-sm opacity-80 hover:opacity-100 flex items-center gap-1">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                </svg>
+                変更ログ
+              </Link>
+              <form action={logoutAction}>
+                <button type="submit" className="text-sm opacity-80 hover:opacity-100">
+                  ログアウト
+                </button>
+              </form>
+            </div>
           </header>
 
           <nav className="bg-white border-b px-2 overflow-x-auto">
