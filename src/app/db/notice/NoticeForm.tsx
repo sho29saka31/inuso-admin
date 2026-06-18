@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-const TARGETS = [
+const ALL_TARGETS = [
   { value: "all", label: "全ユーザー (all)" },
   { value: "guest", label: "ゲストのみ (guest)" },
   { value: "edu", label: "生徒全体 (edu)" },
@@ -10,6 +10,30 @@ const TARGETS = [
   { value: "1nen", label: "1年全体 (1nen)" },
   { value: "2nen", label: "2年全体 (2nen)" },
   { value: "3nen", label: "3年全体 (3nen)" },
+];
+
+const NON_TEACHER_TARGETS = ALL_TARGETS.filter((t) => t.value !== "prof");
+
+const AUTHOR_OPTIONS = [
+  { value: "", label: "選択してください" },
+  { value: "1-1", label: "1年1組" },
+  { value: "1-2", label: "1年2組" },
+  { value: "1-3", label: "1年3組" },
+  { value: "1-4", label: "1年4組" },
+  { value: "2-1", label: "2年1組" },
+  { value: "2-2", label: "2年2組" },
+  { value: "2-3", label: "2年3組" },
+  { value: "2-4", label: "2年4組" },
+  { value: "3-1", label: "3年1組" },
+  { value: "3-2", label: "3年2組" },
+  { value: "3-3", label: "3年3組" },
+  { value: "3-4", label: "3年4組" },
+  { value: "eスポーツ部", label: "eスポーツ部" },
+  { value: "美術部", label: "美術部" },
+  { value: "有志発表", label: "有志発表" },
+  { value: "__teacher__", label: "先生" },
+  { value: "キッチンカー", label: "キッチンカー" },
+  { value: "__other__", label: "その他" },
 ];
 
 interface NoticeFormProps {
@@ -24,9 +48,36 @@ interface NoticeFormProps {
   isEdit?: boolean;
 }
 
+function guessAuthorSelect(authorId?: string): string {
+  if (!authorId) return "";
+  const fixed = AUTHOR_OPTIONS.find(
+    (o) => o.value === authorId && o.value !== "__teacher__" && o.value !== "__other__"
+  );
+  if (fixed) return fixed.value;
+  // Could be teacher name or other free text
+  return "__other__";
+}
+
 export function NoticeForm({ action, defaultValues = {}, isEdit = false }: NoticeFormProps) {
   const [isUrgent, setIsUrgent] = useState(defaultValues.isUrgent ?? false);
   const [pending, setPending] = useState(false);
+  const [authorSelect, setAuthorSelect] = useState(() => guessAuthorSelect(defaultValues.authorId));
+  const [teacherName, setTeacherName] = useState(
+    authorSelect === "__teacher__" ? (defaultValues.authorId ?? "") : ""
+  );
+  const [otherName, setOtherName] = useState(
+    authorSelect === "__other__" ? (defaultValues.authorId ?? "") : ""
+  );
+
+  const isTeacher = authorSelect === "__teacher__";
+  const isOther = authorSelect === "__other__";
+  const targets = isTeacher ? ALL_TARGETS : NON_TEACHER_TARGETS;
+
+  function resolvedAuthorId(): string {
+    if (isTeacher) return teacherName;
+    if (isOther) return otherName;
+    return authorSelect;
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -39,16 +90,41 @@ export function NoticeForm({ action, defaultValues = {}, isEdit = false }: Notic
     setPending(true);
     const fd = new FormData(e.currentTarget);
     fd.set("isUrgent", isUrgent ? "true" : "false");
+    fd.set("authorId", resolvedAuthorId());
     await action(fd);
     setPending(false);
   }
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-      <label className="flex flex-col gap-1">
-        <span className="text-sm font-medium">発信元（authorId）</span>
-        <input name="authorId" defaultValue={defaultValues.authorId ?? ""} className="border rounded-lg px-3 py-2 text-sm" placeholder="例: 教員名 / クラス名" />
-      </label>
+      <div className="flex flex-col gap-1">
+        <span className="text-sm font-medium">発信元</span>
+        <select
+          value={authorSelect}
+          onChange={(e) => setAuthorSelect(e.target.value)}
+          className="border rounded-lg px-3 py-2 text-sm"
+        >
+          {AUTHOR_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value}>{o.label}</option>
+          ))}
+        </select>
+        {isTeacher && (
+          <input
+            value={teacherName}
+            onChange={(e) => setTeacherName(e.target.value)}
+            className="border rounded-lg px-3 py-2 text-sm mt-1"
+            placeholder="先生名を入力"
+          />
+        )}
+        {isOther && (
+          <input
+            value={otherName}
+            onChange={(e) => setOtherName(e.target.value)}
+            className="border rounded-lg px-3 py-2 text-sm mt-1"
+            placeholder="発信元を入力"
+          />
+        )}
+      </div>
 
       <label className="flex flex-col gap-1">
         <span className="text-sm font-medium">タイトル <span className="text-danger">*</span></span>
@@ -63,10 +139,13 @@ export function NoticeForm({ action, defaultValues = {}, isEdit = false }: Notic
       <label className="flex flex-col gap-1">
         <span className="text-sm font-medium">通知対象 <span className="text-danger">*</span></span>
         <select name="target" defaultValue={defaultValues.target ?? "all"} className="border rounded-lg px-3 py-2 text-sm">
-          {TARGETS.map((t) => (
+          {targets.map((t) => (
             <option key={t.value} value={t.value}>{t.label}</option>
           ))}
         </select>
+        {!isTeacher && (
+          <p className="text-xs text-gray-400 mt-0.5">※ 先生全体への通知は発信元を「先生」にした場合のみ選択できます</p>
+        )}
       </label>
 
       <label className="flex items-center gap-2 cursor-pointer">

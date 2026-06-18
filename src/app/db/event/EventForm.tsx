@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { CalendarPicker } from "./CalendarPicker";
 
 interface EventFormProps {
   action: (formData: FormData) => Promise<void>;
@@ -36,10 +37,10 @@ export function EventForm({ action, defaultValues = {}, isEdit = false }: EventF
         <input name="eventName" defaultValue={defaultValues.eventName ?? ""} required className="border rounded-lg px-3 py-2 text-sm" placeholder="例: 開会式" />
       </label>
 
-      <label className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1">
         <span className="text-sm font-medium">開催日 <span className="text-danger">*</span></span>
-        <input name="day" type="date" defaultValue={defaultValues.day ?? "2026-09-07"} required className="border rounded-lg px-3 py-2 text-sm" />
-      </label>
+        <CalendarPicker name="day" defaultValue={defaultValues.day ?? "2026-09-07"} required />
+      </div>
 
       <div className="flex gap-3">
         <label className="flex flex-col gap-1 flex-1">
