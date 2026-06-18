@@ -19,31 +19,47 @@ export interface BoothData {
 export async function createBooth(formData: FormData) {
   const db = getDb();
   const now = nowTimestamp();
-  const data: BoothData = {
-    boothId: (formData.get("boothId") as string).trim(),
-    category: formData.get("category") as string,
-    name: formData.get("name") as string,
-    location: formData.get("location") as string,
-    description: formData.get("description") as string,
-    boothImage: formData.get("boothImage") as string,
+  const category = formData.get("category") as string;
+  const boothId = (formData.get("boothId") as string).trim();
+  const isEat = category === "eat";
+
+  const base = {
+    boothId,
+    category,
     status: Number(formData.get("status") ?? 1),
     waitCount: 0,
     mode: "manual",
-  };
-
-  await db.collection("booths").doc(data.boothId).set({
-    ...data,
     bluetoothData: null,
     threshold: null,
     updatedAt: now,
-  });
+  };
+
+  const extra = isEat
+    ? {
+        type: formData.get("type") as string,
+        shopName: formData.get("shopName") as string,
+        location: formData.get("location") as string,
+        imageUrl: formData.get("imageUrl") as string,
+        products: [],
+        instagramUrl: "",
+      }
+    : {
+        name: formData.get("name") as string,
+        location: formData.get("location") as string,
+        description: formData.get("description") as string,
+        boothImage: formData.get("boothImage") as string,
+      };
+
+  const data = { ...base, ...extra };
+
+  await db.collection("booths").doc(boothId).set(data);
 
   await saveChangeLog({
     operatorId: "db-admin",
     targetCollection: "booths",
-    targetId: data.boothId,
+    targetId: boothId,
     changeType: "create",
-    changedFields: { created: data },
+    changedFields: { created: data as unknown as Record<string, unknown> },
   });
 
   redirect("/db/booth");
@@ -52,15 +68,24 @@ export async function createBooth(formData: FormData) {
 export async function updateBooth(boothId: string, formData: FormData) {
   const db = getDb();
   const now = nowTimestamp();
-  const fields = {
-    name: formData.get("name") as string,
-    location: formData.get("location") as string,
-    description: formData.get("description") as string,
-    boothImage: formData.get("boothImage") as string,
-    status: Number(formData.get("status") ?? 1),
-    category: formData.get("category") as string,
-    updatedAt: now,
-  };
+  const category = formData.get("category") as string;
+  const isEat = category === "eat";
+  const fields = isEat
+    ? {
+        shopName: formData.get("shopName") as string,
+        location: formData.get("location") as string,
+        imageUrl: formData.get("imageUrl") as string,
+        status: Number(formData.get("status") ?? 1),
+        updatedAt: now,
+      }
+    : {
+        name: formData.get("name") as string,
+        location: formData.get("location") as string,
+        description: formData.get("description") as string,
+        boothImage: formData.get("boothImage") as string,
+        status: Number(formData.get("status") ?? 1),
+        updatedAt: now,
+      };
 
   await db.collection("booths").doc(boothId).update(fields);
 

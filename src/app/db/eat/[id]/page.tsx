@@ -23,16 +23,14 @@ export default async function EatEditPage({ params }: { params: Promise<{ id: st
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-xl font-bold">飲食 編集</h1>
+      <h1 className="text-xl font-bold">
+        {item.shopName as string} — 商品・インスタ編集
+      </h1>
       <EatForm
         action={update}
-        isEdit
         defaultValues={{
-          shopName: item.shopName as string,
           instagramUrl: item.instagramUrl as string,
           products: item.products as { name: string; price: number }[],
-          imageUrl: item.imageUrl as string,
-          status: item.status as number,
         }}
       />
     </div>
