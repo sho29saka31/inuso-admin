@@ -42,7 +42,7 @@ export async function deleteSession() {
   cookieStore.delete(COOKIE);
 }
 
-export function checkCredential(stage: "id" | "pw" | "pin", value: string): boolean {
+export async function checkCredential(stage: "id" | "pw" | "pin", value: string): Promise<boolean> {
   if (stage === "id") return value === (process.env.DB_ADMIN_ID ?? "");
   if (stage === "pw") return value === (process.env.DB_ADMIN_PW ?? "");
   if (stage === "pin") return value === (process.env.DB_ADMIN_PIN ?? "");

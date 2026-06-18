@@ -8,13 +8,13 @@ export async function loginAction(formData: FormData) {
   const pw = (formData.get("pw") as string) ?? "";
   const pin = (formData.get("pin") as string) ?? "";
 
-  if (!checkCredential("id", id)) {
+  if (!await checkCredential("id", id)) {
     return { error: "IDが正しくありません", stage: 1 };
   }
-  if (!checkCredential("pw", pw)) {
+  if (!await checkCredential("pw", pw)) {
     return { error: "パスワードが正しくありません", stage: 2 };
   }
-  if (!checkCredential("pin", pin)) {
+  if (!await checkCredential("pin", pin)) {
     return { error: "PINが正しくありません", stage: 3 };
   }
 

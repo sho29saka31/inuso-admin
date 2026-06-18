@@ -7,7 +7,7 @@ const SECRET = new TextEncoder().encode(
 
 const PROTECTED = /^\/db\/(booth|event|eat|notice|digital|config)/;
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   if (!PROTECTED.test(request.nextUrl.pathname)) {
     return NextResponse.next();
   }
