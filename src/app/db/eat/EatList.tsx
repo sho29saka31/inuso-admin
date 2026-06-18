@@ -4,31 +4,30 @@ import Link from "next/link";
 import { deleteEatItem } from "./actions";
 
 const STATUS_LABELS = ["停止中", "非常に閑散", "閑散", "通常", "混雑", "非常に混雑"];
+const TYPE_LABELS: Record<string, string> = { car: "キッチンカー", pta: "PTAバザー" };
 
 interface Item {
   boothId: string;
-  name: string;
-  location: string;
+  shopName?: string;
+  type?: string;
   status: number;
 }
 
 interface Props {
   items: Item[];
-  type: "car" | "pta";
-  title: string;
 }
 
-export function EatList({ items, type, title }: Props) {
+export function EatList({ items }: Props) {
   async function handleDelete(boothId: string, name: string) {
     if (!confirm(`「${name}」を削除しますか？`)) return;
-    await deleteEatItem(boothId, type);
+    await deleteEatItem(boothId);
   }
 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">{title}</h1>
-        <Link href={`/db/eat/${type}/new`} className="bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium">
+        <h1 className="text-xl font-bold">飲食一覧</h1>
+        <Link href="/db/eat/new" className="bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium">
           + 新規作成
         </Link>
       </div>
@@ -36,23 +35,30 @@ export function EatList({ items, type, title }: Props) {
         <p className="text-text-sub text-sm">データがありません。</p>
       ) : (
         <div className="flex flex-col gap-2">
-          {items.map((item) => (
-            <div key={item.boothId} className="bg-surface rounded-lg border p-4 flex items-start justify-between gap-4">
-              <div>
-                <p className="font-medium text-sm">{item.name}</p>
-                <p className="text-xs text-text-sub">{item.location}</p>
-                <p className="text-xs">状態: {STATUS_LABELS[item.status]}</p>
+          {items.map((item) => {
+            const displayName = item.shopName ?? item.boothId;
+            return (
+              <div key={item.boothId} className="bg-surface rounded-lg border p-4 flex items-start justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-background text-text-sub">
+                      {TYPE_LABELS[item.type ?? ""] ?? item.type}
+                    </span>
+                    <p className="font-medium text-sm">{displayName}</p>
+                  </div>
+                  <p className="text-xs">混雑: {STATUS_LABELS[item.status]}</p>
+                </div>
+                <div className="flex gap-2 shrink-0">
+                  <Link href={`/db/eat/${item.boothId}`} className="text-xs px-3 py-1.5 rounded border border-primary text-primary">
+                    編集
+                  </Link>
+                  <button onClick={() => handleDelete(item.boothId, displayName)} className="text-xs px-3 py-1.5 rounded border border-danger text-danger">
+                    削除
+                  </button>
+                </div>
               </div>
-              <div className="flex gap-2 shrink-0">
-                <Link href={`/db/eat/${type}/${item.boothId}`} className="text-xs px-3 py-1.5 rounded border border-primary text-primary">
-                  編集
-                </Link>
-                <button onClick={() => handleDelete(item.boothId, item.name)} className="text-xs px-3 py-1.5 rounded border border-danger text-danger">
-                  削除
-                </button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
