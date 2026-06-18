@@ -34,15 +34,22 @@ export function DbShell({ children }: { children: React.ReactNode }) {
 
           <nav className="bg-white border-b px-2 overflow-x-auto">
             <div className="flex gap-1 py-1 min-w-max">
-              {NAV_ITEMS.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="px-3 py-1.5 rounded text-sm font-medium text-text-main hover:bg-background whitespace-nowrap"
-                >
-                  {item.label}
-                </Link>
-              ))}
+              {NAV_ITEMS.map((item) => {
+                const active = pathname === item.href || pathname.startsWith(item.href + "/");
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`px-3 py-1.5 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
+                      active
+                        ? "border-primary text-primary"
+                        : "border-transparent text-text-main hover:bg-background"
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })}
             </div>
           </nav>
         </>
