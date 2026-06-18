@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { notFound } from "next/navigation";
 import { getDb } from "@/lib/firebase-admin";
 import { EatForm } from "../EatForm";
