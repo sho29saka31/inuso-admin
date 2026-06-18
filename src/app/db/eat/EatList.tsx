@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { deleteEatItem } from "./actions";
 
 const STATUS_LABELS = ["停止中", "非常に閑散", "閑散", "通常", "混雑", "非常に混雑"];
 const TYPE_LABELS: Record<string, string> = { car: "キッチンカー", pta: "PTAバザー" };
@@ -18,21 +17,14 @@ interface Props {
 }
 
 export function EatList({ items }: Props) {
-  async function handleDelete(boothId: string, name: string) {
-    if (!confirm(`「${name}」を削除しますか？`)) return;
-    await deleteEatItem(boothId);
-  }
-
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold">飲食一覧</h1>
-        <Link href="/db/eat/new" className="bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium">
-          + 新規作成
-        </Link>
+        <p className="text-xs text-text-sub">新規作成はブース管理から</p>
       </div>
       {items.length === 0 ? (
-        <p className="text-text-sub text-sm">データがありません。</p>
+        <p className="text-text-sub text-sm">データがありません。ブース管理から飲食を追加してください。</p>
       ) : (
         <div className="flex flex-col gap-2">
           {items.map((item) => {
@@ -48,14 +40,9 @@ export function EatList({ items }: Props) {
                   </div>
                   <p className="text-xs">混雑: {STATUS_LABELS[item.status]}</p>
                 </div>
-                <div className="flex gap-2 shrink-0">
-                  <Link href={`/db/eat/${item.boothId}`} className="text-xs px-3 py-1.5 rounded border border-primary text-primary">
-                    編集
-                  </Link>
-                  <button onClick={() => handleDelete(item.boothId, displayName)} className="text-xs px-3 py-1.5 rounded border border-danger text-danger">
-                    削除
-                  </button>
-                </div>
+                <Link href={`/db/eat/${item.boothId}`} className="text-xs px-3 py-1.5 rounded border border-primary text-primary shrink-0">
+                  商品・インスタ編集
+                </Link>
               </div>
             );
           })}

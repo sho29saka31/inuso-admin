@@ -1,6 +1,8 @@
 import { getDb } from "@/lib/firebase-admin";
 import { EatList } from "./EatList";
 
+export const dynamic = "force-dynamic";
+
 async function getEatItems() {
   try {
     const db = getDb();
