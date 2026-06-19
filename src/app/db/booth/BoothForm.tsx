@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 
 const CATEGORIES = [
   { value: "class", label: "クラス" },
@@ -38,17 +38,17 @@ interface BoothFormProps {
 
 export function BoothForm({ action, defaultValues = {}, isEdit = false }: BoothFormProps) {
   const [category, setCategory] = useState(defaultValues.category ?? "class");
-  const [pending, setPending] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
   const isEat = category === "eat";
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!confirm(isEdit ? "変更を保存しますか？" : "新規作成しますか？")) return;
-    setPending(true);
     const fd = new FormData(e.currentTarget);
-    await action(fd);
-    setPending(false);
+    startTransition(async () => {
+      await action(fd);
+    });
   }
 
   return (
@@ -207,10 +207,10 @@ export function BoothForm({ action, defaultValues = {}, isEdit = false }: BoothF
         </a>
         <button
           type="submit"
-          disabled={pending}
+          disabled={isPending}
           className="flex-1 py-2 rounded-lg bg-primary text-white font-bold text-sm disabled:opacity-60"
         >
-          {pending ? "保存中…" : isEdit ? "保存" : "作成"}
+          {isPending ? "保存中…" : isEdit ? "保存" : "作成"}
         </button>
       </div>
     </form>
