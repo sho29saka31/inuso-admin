@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 
 const ALL_TARGETS = [
   { value: "all", label: "全ユーザー (all)" },
@@ -66,7 +66,7 @@ function guessAuthorSelect(authorId?: string): string {
 
 export function NoticeForm({ action, defaultValues = {}, isEdit = false }: NoticeFormProps) {
   const [noticeType, setNoticeType] = useState(defaultValues.type ?? "info");
-  const [pending, setPending] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const [authorSelect, setAuthorSelect] = useState(() => guessAuthorSelect(defaultValues.authorId));
   const [teacherName, setTeacherName] = useState(
     authorSelect === "__teacher__" ? (defaultValues.authorId ?? "") : ""
@@ -94,12 +94,10 @@ export function NoticeForm({ action, defaultValues = {}, isEdit = false }: Notic
     } else {
       if (!confirm(isEdit ? "変更を保存しますか？" : "作成しますか？")) return;
     }
-    setPending(true);
     const fd = new FormData(e.currentTarget);
     fd.set("type", noticeType);
     fd.set("authorId", resolvedAuthorId());
-    await action(fd);
-    setPending(false);
+    startTransition(async () => { await action(fd); });
   }
 
   return (
@@ -176,8 +174,8 @@ export function NoticeForm({ action, defaultValues = {}, isEdit = false }: Notic
 
       <div className="flex gap-3 mt-2">
         <a href="/db/notice" className="flex-1 text-center py-2 rounded-lg border text-sm">キャンセル</a>
-        <button type="submit" disabled={pending} className="flex-1 py-2 rounded-lg bg-primary text-white font-bold text-sm disabled:opacity-60">
-          {pending ? "保存中…" : isEdit ? "保存" : "作成"}
+        <button type="submit" disabled={isPending} className="flex-1 py-2 rounded-lg bg-primary text-white font-bold text-sm disabled:opacity-60">
+          {isPending ? "保存中…" : isEdit ? "保存" : "作成"}
         </button>
       </div>
     </form>
