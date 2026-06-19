@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getOperatorId } from "@/lib/admin-auth";
+import { getOperatorId, getAdminScope } from "@/lib/admin-auth";
 import { AdminShell } from "./AdminShell";
 
 export default async function AdminAuthLayout({
@@ -11,5 +11,10 @@ export default async function AdminAuthLayout({
   if (!operatorId) {
     redirect("/admin/login");
   }
-  return <AdminShell operatorId={operatorId}>{children}</AdminShell>;
+  const scope = await getAdminScope();
+  return (
+    <AdminShell operatorId={operatorId} scope={scope ?? ""}>
+      {children}
+    </AdminShell>
+  );
 }

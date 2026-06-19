@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 import Link from "next/link";
 import { getDb } from "@/lib/firebase-admin";
 import { getAdminScope } from "@/lib/admin-auth";
+import { isFullAccess, getScopeBoothTerm, getScopeLabel } from "@/lib/admin-scope";
 
 const STATUS_LABELS = ["停止中", "非常に閑散", "閑散", "通常", "混雑", "非常に混雑"];
 const STATUS_COLORS = [
@@ -14,9 +15,10 @@ const STATUS_COLORS = [
 ];
 
 function boothMatchesScope(booth: Record<string, unknown>, scope: string): boolean {
-  if (scope === "全アクセス") return true;
+  if (isFullAccess(scope)) return true;
+  const term = getScopeBoothTerm(scope).toLowerCase();
   const name = ((booth.name ?? booth.shopName ?? "") as string).toLowerCase();
-  return name.includes(scope.toLowerCase());
+  return name.includes(term);
 }
 
 async function getBooths(scope: string) {
@@ -24,7 +26,7 @@ async function getBooths(scope: string) {
     const db = getDb();
     const snap = await db.collection("booths").orderBy("boothId").get();
     const all = snap.docs.map((d) => d.data());
-    return scope === "全アクセス" ? all : all.filter((b) => boothMatchesScope(b, scope));
+    return isFullAccess(scope) ? all : all.filter((b) => boothMatchesScope(b, scope));
   } catch {
     return null;
   }
@@ -40,9 +42,6 @@ export default async function AdminMyBoothPage() {
         <p className="text-sm text-text-sub">
           所属が設定されていません。一度ログアウトして再度ログインしてください。
         </p>
-        <Link href="/admin/booth" className="text-sm text-primary underline">
-          ブース一覧へ
-        </Link>
       </div>
     );
   }
@@ -53,7 +52,7 @@ export default async function AdminMyBoothPage() {
     <div className="flex flex-col gap-4">
       <div>
         <h1 className="text-xl font-bold">マイブース</h1>
-        <p className="text-xs text-text-sub mt-0.5">所属: {scope}</p>
+        <p className="text-xs text-text-sub mt-0.5">所属: {getScopeLabel(scope)}</p>
       </div>
 
       {booths === null ? (
@@ -61,9 +60,11 @@ export default async function AdminMyBoothPage() {
       ) : booths.length === 0 ? (
         <div className="flex flex-col gap-2">
           <p className="text-text-sub text-sm">担当ブースが見つかりません。</p>
-          <Link href="/admin/booth" className="text-sm text-primary underline">
-            全ブース一覧を見る
-          </Link>
+          {isFullAccess(scope) && (
+            <Link href="/admin/booth" className="text-sm text-primary underline">
+              全ブース一覧を見る
+            </Link>
+          )}
         </div>
       ) : (
         <div className="flex flex-col gap-2">

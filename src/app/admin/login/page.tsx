@@ -4,26 +4,56 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-const SCOPE_OPTIONS = [
-  { value: "", label: "選択してください", group: "" },
-  { value: "全アクセス", label: "教員（全アクセス）", group: "教員・委員会" },
-  { value: "1年1組", label: "1年1組", group: "1年" },
-  { value: "1年2組", label: "1年2組", group: "1年" },
-  { value: "1年3組", label: "1年3組", group: "1年" },
-  { value: "1年4組", label: "1年4組", group: "1年" },
-  { value: "2年1組", label: "2年1組", group: "2年" },
-  { value: "2年2組", label: "2年2組", group: "2年" },
-  { value: "2年3組", label: "2年3組", group: "2年" },
-  { value: "2年4組", label: "2年4組", group: "2年" },
-  { value: "3年1組", label: "3年1組", group: "3年" },
-  { value: "3年2組", label: "3年2組", group: "3年" },
-  { value: "3年3組", label: "3年3組", group: "3年" },
-  { value: "3年4組", label: "3年4組", group: "3年" },
-  { value: "eスポーツ部", label: "eスポーツ部", group: "部活・有志" },
-  { value: "美術部", label: "美術部", group: "部活・有志" },
-  { value: "有志発表", label: "有志発表", group: "部活・有志" },
-  { value: "キッチンカー", label: "キッチンカー", group: "その他" },
-  { value: "PTAバザー", label: "PTAバザー", group: "その他" },
+const SCOPE_GROUPS = [
+  {
+    group: "教員・実行委員",
+    items: [
+      { value: "全アクセス", label: "教員（全アクセス）" },
+      { value: "全アクセス", label: "実行委員（全アクセス）" },
+    ],
+  },
+  {
+    group: "1年",
+    items: [
+      { value: "1-1", label: "1年1組" },
+      { value: "1-2", label: "1年2組" },
+      { value: "1-3", label: "1年3組" },
+      { value: "1-4", label: "1年4組" },
+    ],
+  },
+  {
+    group: "2年",
+    items: [
+      { value: "2-1", label: "2年1組" },
+      { value: "2-2", label: "2年2組" },
+      { value: "2-3", label: "2年3組" },
+      { value: "2-4", label: "2年4組" },
+    ],
+  },
+  {
+    group: "3年",
+    items: [
+      { value: "3-1", label: "3年1組" },
+      { value: "3-2", label: "3年2組" },
+      { value: "3-3", label: "3年3組" },
+      { value: "3-4", label: "3年4組" },
+    ],
+  },
+  {
+    group: "部活・有志",
+    items: [
+      { value: "eスポーツ部", label: "eスポーツ部" },
+      { value: "美術部", label: "美術部" },
+      { value: "有志発表", label: "有志発表" },
+    ],
+  },
+  {
+    group: "その他",
+    items: [
+      { value: "キッチンカー", label: "キッチンカー" },
+      { value: "PTAバザー", label: "PTAバザー" },
+    ],
+  },
 ];
 
 export default function AdminLoginPage() {
@@ -50,7 +80,7 @@ export default function AdminLoginPage() {
       body: JSON.stringify({ operatorId: name.trim(), scope }),
     });
     if (res.ok) {
-      router.push("/admin/booth");
+      router.push("/admin/mybooth");
     } else {
       setError("ログインに失敗しました");
     }
@@ -62,8 +92,6 @@ export default function AdminLoginPage() {
     if (tapTimer.current) clearTimeout(tapTimer.current);
     tapTimer.current = setTimeout(() => setTapCount(0), 1500);
   }
-
-  const groups = Array.from(new Set(SCOPE_OPTIONS.filter((o) => o.group).map((o) => o.group)));
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
@@ -107,11 +135,11 @@ export default function AdminLoginPage() {
               className="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             >
               <option value="">選択してください</option>
-              {groups.map((group) => (
-                <optgroup key={group} label={group}>
-                  {SCOPE_OPTIONS.filter((o) => o.group === group).map((o) => (
-                    <option key={o.value} value={o.value}>
-                      {o.label}
+              {SCOPE_GROUPS.map((g) => (
+                <optgroup key={g.group} label={g.group}>
+                  {g.items.map((item) => (
+                    <option key={item.label} value={item.value}>
+                      {item.label}
                     </option>
                   ))}
                 </optgroup>
