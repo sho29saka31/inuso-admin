@@ -31,13 +31,11 @@ export function EatList({ items }: Props) {
             const displayName = item.shopName ?? item.boothId;
             return (
               <div key={item.boothId} className="bg-surface rounded-lg border p-4 flex items-start justify-between gap-4">
-                <div>
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-background text-text-sub">
-                      {TYPE_LABELS[item.type ?? ""] ?? item.type}
-                    </span>
-                    <p className="font-medium text-sm">{displayName}</p>
-                  </div>
+                <div className="flex flex-col gap-0.5 min-w-0">
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-background text-text-sub w-fit">
+                    {TYPE_LABELS[item.type ?? ""] ?? item.type}
+                  </span>
+                  <p className="font-medium text-sm truncate">{displayName}</p>
                   <p className="text-xs">混雑: {STATUS_LABELS[item.status]}</p>
                 </div>
                 <Link href={`/db/eat/${item.boothId}`} className="text-xs px-3 py-1.5 rounded border border-primary text-primary shrink-0">
