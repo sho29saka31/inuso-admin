@@ -42,8 +42,8 @@ export async function POST(req: NextRequest) {
     const messaging = getMessaging();
     await messaging.send({
       topic: target ?? "all",
-      notification: { title, body },
-      data: { noticeId, type: type ?? "info" },
+      data: { noticeId, type: type ?? "info", title, body },
+      webpush: { headers: { Urgency: "high" } },
     });
   } catch (err) {
     console.error("FCM send error:", err);
