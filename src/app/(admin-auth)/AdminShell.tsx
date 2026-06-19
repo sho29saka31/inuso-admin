@@ -4,10 +4,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const NAV_ITEMS = [
+  { href: "/admin/mybooth", label: "マイブース" },
   { href: "/admin/booth", label: "ブース" },
   { href: "/admin/eat", label: "飲食" },
   { href: "/admin/event", label: "イベント" },
-  { href: "/admin/notice", label: "通知" },
+  { href: "/admin/notice", label: "通知送信" },
+  { href: "/admin/notice/history", label: "通知履歴" },
   { href: "/admin/logs", label: "ログ" },
 ];
 
@@ -47,7 +49,9 @@ export function AdminShell({
       <nav className="bg-white border-b px-2 overflow-x-auto">
         <div className="flex gap-1 py-1 min-w-max">
           {NAV_ITEMS.map((item) => {
-            const active = pathname === item.href || pathname.startsWith(item.href + "/");
+            const active =
+              pathname === item.href ||
+              (item.href !== "/admin/notice" && pathname.startsWith(item.href + "/"));
             return (
               <Link
                 key={item.href}
