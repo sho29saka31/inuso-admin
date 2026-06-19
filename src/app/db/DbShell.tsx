@@ -9,8 +9,7 @@ const NAV_ITEMS = [
   { href: "/db/event", label: "イベント" },
   { href: "/db/eat", label: "飲食" },
   { href: "/db/notice", label: "通知" },
-  { href: "/db/digital", label: "パンフレット" },
-  { href: "/db/map", label: "マップ" },
+  { href: "/db/files", label: "ファイル" },
   { href: "/db/config", label: "設定" },
 ];
 

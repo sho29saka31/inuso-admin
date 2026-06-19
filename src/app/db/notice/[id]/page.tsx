@@ -30,7 +30,7 @@ export default async function NoticeEditPage({ params }: { params: Promise<{ id:
         title: item.title as string,
         body: item.body as string,
         target: item.target as string,
-        isUrgent: item.isUrgent as boolean,
+        type: (item.type as string) ?? (item.isUrgent ? "urgent" : "info"),
       }} />
     </div>
   );

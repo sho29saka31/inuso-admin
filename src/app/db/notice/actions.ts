@@ -4,6 +4,18 @@ import { redirect } from "next/navigation";
 import { getDb, nowTimestamp } from "@/lib/firebase-admin";
 import { saveChangeLog } from "@/lib/changelog";
 
+async function revalidateViewer(paths: string[]) {
+  const viewerUrl = process.env.VIEWER_REVALIDATE_URL;
+  const viewerSecret = process.env.VIEWER_REVALIDATE_SECRET;
+  if (viewerUrl && viewerSecret) {
+    await fetch(viewerUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ secret: viewerSecret, paths }),
+    }).catch(() => {});
+  }
+}
+
 export async function createNotice(formData: FormData) {
   const db = getDb();
   const now = nowTimestamp();
@@ -14,7 +26,7 @@ export async function createNotice(formData: FormData) {
     title: formData.get("title") as string,
     body: formData.get("body") as string,
     target: formData.get("target") as string,
-    isUrgent: formData.get("isUrgent") === "true",
+    type: (formData.get("type") as string) || "info",
     createdAt: now,
     updatedAt: now,
   };
@@ -28,6 +40,7 @@ export async function createNotice(formData: FormData) {
     changedFields: { created: data },
   });
 
+  await revalidateViewer(["/notice", "/top"]);
   redirect("/db/notice");
 }
 
@@ -38,7 +51,7 @@ export async function updateNotice(noticeId: string, formData: FormData) {
     title: formData.get("title") as string,
     body: formData.get("body") as string,
     target: formData.get("target") as string,
-    isUrgent: formData.get("isUrgent") === "true",
+    type: (formData.get("type") as string) || "info",
     updatedAt: now,
   };
 
@@ -51,6 +64,7 @@ export async function updateNotice(noticeId: string, formData: FormData) {
     changedFields: fields,
   });
 
+  await revalidateViewer(["/notice", "/top"]);
   redirect("/db/notice");
 }
 
@@ -64,5 +78,6 @@ export async function deleteNotice(noticeId: string) {
     changeType: "delete",
     changedFields: {},
   });
+  await revalidateViewer(["/notice", "/top"]);
   redirect("/db/notice");
 }
