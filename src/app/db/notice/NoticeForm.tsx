@@ -133,6 +133,19 @@ export function NoticeForm({ action, defaultValues = {}, isEdit = false }: Notic
         )}
       </div>
 
+      <div className="flex flex-col gap-1">
+        <span className="text-sm font-medium">通知種別</span>
+        <select
+          value={noticeType}
+          onChange={(e) => setNoticeType(e.target.value)}
+          className="border rounded-lg px-3 py-2 text-sm"
+        >
+          {TYPE_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value}>{o.label}</option>
+          ))}
+        </select>
+      </div>
+
       <label className="flex flex-col gap-1">
         <span className="text-sm font-medium">タイトル <span className="text-danger">*</span></span>
         <input name="title" defaultValue={defaultValues.title ?? ""} required className="border rounded-lg px-3 py-2 text-sm" />
@@ -154,19 +167,6 @@ export function NoticeForm({ action, defaultValues = {}, isEdit = false }: Notic
           <p className="text-xs text-gray-400 mt-0.5">※ 先生全体への通知は発信元を「先生」にした場合のみ選択できます</p>
         )}
       </label>
-
-      <div className="flex flex-col gap-1">
-        <span className="text-sm font-medium">通知種別</span>
-        <select
-          value={noticeType}
-          onChange={(e) => setNoticeType(e.target.value)}
-          className="border rounded-lg px-3 py-2 text-sm"
-        >
-          {TYPE_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>{o.label}</option>
-          ))}
-        </select>
-      </div>
 
       {isUrgent && (
         <div className="bg-red-50 border border-danger rounded p-3 text-xs text-danger">

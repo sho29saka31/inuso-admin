@@ -7,6 +7,7 @@ const CATEGORIES = [
   { value: "club", label: "部活動" },
   { value: "eat", label: "飲食" },
   { value: "act", label: "有志" },
+  { value: "committee", label: "委員会" },
 ];
 
 const STATUS_OPTIONS = [
@@ -67,8 +68,7 @@ export function BoothForm({ action, defaultValues = {}, isEdit = false }: BoothF
           name="boothId"
           defaultValue={defaultValues.boothId ?? ""}
           required
-          disabled={isEdit}
-          className="border rounded-lg px-3 py-2 text-sm disabled:bg-gray-100"
+          className="border rounded-lg px-3 py-2 text-sm"
           placeholder="例: class1-1"
         />
       </label>
@@ -79,8 +79,7 @@ export function BoothForm({ action, defaultValues = {}, isEdit = false }: BoothF
           name="category"
           value={category}
           onChange={(e) => setCategory(e.target.value)}
-          disabled={isEdit}
-          className="border rounded-lg px-3 py-2 text-sm disabled:bg-gray-100"
+          className="border rounded-lg px-3 py-2 text-sm"
         >
           {CATEGORIES.map((c) => (
             <option key={c.value} value={c.value}>{c.label}</option>
@@ -95,8 +94,7 @@ export function BoothForm({ action, defaultValues = {}, isEdit = false }: BoothF
             <select
               name="type"
               defaultValue={defaultValues.type ?? "car"}
-              disabled={isEdit}
-              className="border rounded-lg px-3 py-2 text-sm disabled:bg-gray-100"
+              className="border rounded-lg px-3 py-2 text-sm"
             >
               <option value="car">キッチンカー</option>
               <option value="pta">PTAバザー</option>
