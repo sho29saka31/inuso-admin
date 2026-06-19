@@ -27,7 +27,7 @@ const TARGET_LABELS: Record<string, string> = {
   "3nen": "3年全体",
 };
 
-interface Notice {
+export interface Notice {
   noticeId: string;
   title: string;
   body?: string;

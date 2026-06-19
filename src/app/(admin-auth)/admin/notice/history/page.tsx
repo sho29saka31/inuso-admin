@@ -1,8 +1,7 @@
 export const dynamic = "force-dynamic";
 import { getDb } from "@/lib/firebase-admin";
 import { getAdminScope } from "@/lib/admin-auth";
-import { isFullAccess } from "@/lib/admin-scope";
-import NoticeHistoryClient from "./NoticeHistoryClient";
+import NoticeHistoryClient, { type Notice } from "./NoticeHistoryClient";
 
 async function getNotices() {
   try {
@@ -12,7 +11,7 @@ async function getNotices() {
       .orderBy("createdAt.unix", "desc")
       .limit(50)
       .get();
-    return snap.docs.map((d) => d.data());
+    return snap.docs.map((d) => d.data() as Notice);
   } catch {
     return null;
   }
