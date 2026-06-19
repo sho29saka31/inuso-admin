@@ -2,30 +2,57 @@ import { NextRequest, NextResponse } from "next/server";
 import { getDb, nowTimestamp } from "@/lib/firebase-admin";
 import { saveChangeLog } from "@/lib/changelog";
 
+// C-3 ハイブリッド型混雑レベル算出
+const deviceHistory: Map<string, number[]> = new Map();
+
+function calcStatus(boothId: string, deviceCount: number): number {
+  const history = deviceHistory.get(boothId) ?? [];
+  history.push(deviceCount);
+  if (history.length > 30) history.shift();
+  deviceHistory.set(boothId, history);
+
+  const baseline = history.length > 0 ? Math.max(...history) : 20;
+  if (baseline === 0) return 1;
+
+  const ratio = (deviceCount / baseline) * 100;
+  if (ratio <= 15) return 1;
+  if (ratio <= 35) return 2;
+  if (ratio <= 55) return 3;
+  if (ratio <= 75) return 4;
+  return 5;
+}
+
 export async function POST(req: NextRequest) {
-  const secret = req.headers.get("x-secret");
-  if (secret !== process.env.BLUETOOTH_SECRET) {
+  const authHeader = req.headers.get("authorization") ?? "";
+  const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
+  if (token !== process.env.BLUETOOTH_SECRET) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { boothId, status, waitCount } = await req.json();
-  if (!boothId) {
-    return NextResponse.json({ error: "boothId required" }, { status: 400 });
+  const body = await req.json();
+  const { boothId, deviceCount, macAddresses, operatorId } = body;
+
+  if (!boothId || deviceCount === undefined) {
+    return NextResponse.json({ error: "boothId and deviceCount required" }, { status: 400 });
   }
+
+  const status = calcStatus(boothId, Number(deviceCount));
 
   const db = getDb();
   const now = nowTimestamp();
-  const fields: Record<string, unknown> = { updatedAt: now };
-  if (status !== undefined) fields.status = Number(status);
-  if (waitCount !== undefined) fields.waitCount = Number(waitCount);
+  const fields: Record<string, unknown> = {
+    status,
+    deviceCount: Number(deviceCount),
+    updatedAt: now,
+  };
 
   await db.collection("booths").doc(boothId).update(fields);
   await saveChangeLog({
-    operatorId: "bluetooth-sensor",
+    operatorId: operatorId ?? `bt-${boothId}`,
     targetCollection: "booths",
     targetId: boothId,
     changeType: "update",
-    changedFields: fields,
+    changedFields: { status, deviceCount: Number(deviceCount) },
   });
 
   const viewerUrl = process.env.VIEWER_REVALIDATE_URL;
@@ -38,5 +65,5 @@ export async function POST(req: NextRequest) {
     }).catch(() => {});
   }
 
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true, status });
 }
