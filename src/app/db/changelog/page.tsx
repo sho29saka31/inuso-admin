@@ -16,13 +16,16 @@ const COLLECTION_LABEL: Record<string, string> = {
   config: "設定",
 };
 
-function formatDate(ts: { _seconds: number } | null | undefined): string {
+function formatDate(ts: { display?: string; unix?: number } | null | undefined): string {
   if (!ts) return "—";
-  const d = new Date(ts._seconds * 1000);
-  return d.toLocaleString("ja-JP", {
-    year: "numeric", month: "2-digit", day: "2-digit",
-    hour: "2-digit", minute: "2-digit",
-  });
+  if (ts.display) return ts.display;
+  if (ts.unix) {
+    return new Date(ts.unix).toLocaleString("ja-JP", {
+      year: "numeric", month: "2-digit", day: "2-digit",
+      hour: "2-digit", minute: "2-digit",
+    });
+  }
+  return "—";
 }
 
 export default async function ChangelogPage() {
@@ -40,7 +43,7 @@ export default async function ChangelogPage() {
     targetId: string;
     changeType: string;
     changedFields: Record<string, unknown>;
-    changedAt: { _seconds: number } | null;
+    changedAt: { display?: string; unix?: number } | null;
   }>;
 
   return (

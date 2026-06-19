@@ -1,12 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function AdminLoginPage() {
   const router = useRouter();
   const [name, setName] = useState("");
   const [error, setError] = useState("");
+  const [tapCount, setTapCount] = useState(0);
+  const tapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -26,12 +29,32 @@ export default function AdminLoginPage() {
     }
   }
 
+  function handleTitleTap() {
+    const next = tapCount + 1;
+    setTapCount(next);
+    if (tapTimer.current) clearTimeout(tapTimer.current);
+    tapTimer.current = setTimeout(() => setTapCount(0), 1500);
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="bg-white rounded-2xl shadow-md p-8 w-full max-w-sm flex flex-col gap-6">
         <div className="text-center">
-          <h1 className="text-xl font-bold text-text-main">ISF 運営管理</h1>
+          <h1
+            className="text-xl font-bold text-text-main select-none cursor-default"
+            onClick={handleTitleTap}
+          >
+            ISF 運営管理
+          </h1>
           <p className="text-sm text-text-sub mt-1">担当者名を入力してください</p>
+          {tapCount >= 3 && (
+            <Link
+              href="/db"
+              className="mt-3 inline-block text-xs text-text-sub underline"
+            >
+              DB管理セクションへ
+            </Link>
+          )}
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
