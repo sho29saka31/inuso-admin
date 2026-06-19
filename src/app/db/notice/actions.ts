@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { getDb, nowTimestamp } from "@/lib/firebase-admin";
 import { saveChangeLog } from "@/lib/changelog";
+import { getMessaging } from "firebase-admin/messaging";
 
 async function revalidateViewer(paths: string[]) {
   const viewerUrl = process.env.VIEWER_REVALIDATE_URL;
@@ -13,6 +14,19 @@ async function revalidateViewer(paths: string[]) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ secret: viewerSecret, paths }),
     }).catch(() => {});
+  }
+}
+
+async function sendFcmPush(title: string, body: string, target: string, noticeId: string, type: string) {
+  try {
+    const messaging = getMessaging();
+    await messaging.send({
+      topic: target,
+      notification: { title, body },
+      data: { noticeId, type },
+    });
+  } catch (err) {
+    console.error("FCM send error:", err);
   }
 }
 
@@ -40,7 +54,11 @@ export async function createNotice(formData: FormData) {
     changedFields: { created: data },
   });
 
-  await revalidateViewer(["/notice", "/top"]);
+  await Promise.all([
+    sendFcmPush(data.title, data.body, data.target, noticeId, data.type),
+    revalidateViewer(["/notice", "/top"]),
+  ]);
+
   redirect("/db/notice");
 }
 

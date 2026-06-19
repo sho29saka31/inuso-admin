@@ -31,6 +31,13 @@ const AUTHOR_OPTIONS = [
   { value: "__other__", label: "その他" },
 ];
 
+const TYPE_OPTIONS = [
+  { value: "urgent", label: "緊急" },
+  { value: "info", label: "お知らせ" },
+  { value: "warning", label: "注意" },
+  { value: "other", label: "その他" },
+];
+
 export default function AdminNoticePage() {
   const router = useRouter();
   const [authorSelect, setAuthorSelect] = useState("");
@@ -39,8 +46,7 @@ export default function AdminNoticePage() {
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [target, setTarget] = useState("all");
-  const [isUrgent, setIsUrgent] = useState(false);
-  const [sendPush, setSendPush] = useState(true);
+  const [type, setType] = useState("info");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -73,8 +79,7 @@ export default function AdminNoticePage() {
         title: title.trim(),
         body: body.trim(),
         target,
-        isUrgent,
-        sendPush,
+        type,
       }),
     });
 
@@ -85,7 +90,7 @@ export default function AdminNoticePage() {
       setBody("");
       setAuthorSelect("");
       setTarget("all");
-      setIsUrgent(false);
+      setType("info");
     } else {
       const data = await res.json().catch(() => ({}));
       setError(data.error ?? "送信に失敗しました");
@@ -163,25 +168,18 @@ export default function AdminNoticePage() {
           </select>
         </div>
 
-        <div className="flex flex-col gap-2">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={isUrgent}
-              onChange={(e) => setIsUrgent(e.target.checked)}
-              className="rounded"
-            />
-            <span className="text-sm font-medium">緊急通知</span>
-          </label>
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={sendPush}
-              onChange={(e) => setSendPush(e.target.checked)}
-              className="rounded"
-            />
-            <span className="text-sm font-medium">プッシュ通知を送る (FCM)</span>
-          </label>
+        <div className="flex flex-col gap-1">
+          <label className="text-sm font-medium">通知種別</label>
+          <select
+            value={type}
+            onChange={(e) => setType(e.target.value)}
+            className="border rounded-lg px-3 py-2 text-sm"
+          >
+            {TYPE_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
+          </select>
+          <p className="text-xs text-gray-400 mt-0.5">すべての種別でプッシュ通知が送信されます</p>
         </div>
 
         {error && <p className="text-xs text-danger">{error}</p>}
