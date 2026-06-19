@@ -24,25 +24,37 @@ async function saveFiles(formData: FormData) {
   const db = getDb();
   const now = nowTimestamp();
 
-  const mapFields = { imageUrl: formData.get("imageUrl") as string, updatedAt: now };
-  const digitalFields = { pdfUrl: formData.get("pdfUrl") as string, updatedAt: now };
+  const newImageUrl = (formData.get("imageUrl") as string).trim();
+  const newPdfUrl = (formData.get("pdfUrl") as string).trim();
 
-  await Promise.all([
-    db.collection("config").doc("map").set(mapFields, { merge: true }),
-    db.collection("config").doc("digital").set(digitalFields, { merge: true }),
-  ]);
+  const updates: Promise<unknown>[] = [];
 
-  await Promise.all([
-    saveChangeLog({ operatorId: "db-admin", targetCollection: "config", targetId: "map", changeType: "update", changedFields: mapFields }),
-    saveChangeLog({ operatorId: "db-admin", targetCollection: "config", targetId: "digital", changeType: "update", changedFields: digitalFields }),
-  ]);
+  if (newImageUrl) {
+    const mapFields = { imageUrl: newImageUrl, updatedAt: now };
+    updates.push(
+      db.collection("config").doc("map").set(mapFields, { merge: true }),
+      saveChangeLog({ operatorId: "db-admin", targetCollection: "config", targetId: "map", changeType: "update", changedFields: mapFields }),
+    );
+  }
 
+  if (newPdfUrl) {
+    const digitalFields = { pdfUrl: newPdfUrl, updatedAt: now };
+    updates.push(
+      db.collection("config").doc("digital").set(digitalFields, { merge: true }),
+      saveChangeLog({ operatorId: "db-admin", targetCollection: "config", targetId: "digital", changeType: "update", changedFields: digitalFields }),
+    );
+  }
+
+  await Promise.all(updates);
   revalidatePath("/db/files");
 }
 
 export default async function FilesPage() {
   const { map, digital } = await getFilesConfig();
   const hasError = map === null || digital === null;
+
+  const currentImageUrl = (map?.imageUrl as string) ?? "";
+  const currentPdfUrl = (digital?.pdfUrl as string) ?? "";
 
   return (
     <div className="flex flex-col gap-6">
@@ -52,44 +64,60 @@ export default async function FilesPage() {
         <p className="text-danger text-sm">Firebase未設定。</p>
       ) : (
         <form action={saveFiles} className="flex flex-col gap-6">
+
           <section className="flex flex-col gap-3">
             <h2 className="text-base font-semibold border-b pb-1">校舎マップ画像</h2>
+
+            <div className="flex flex-col gap-1">
+              <span className="text-xs text-text-sub font-medium">現在の設定値</span>
+              {currentImageUrl ? (
+                <>
+                  <p className="text-sm text-text-main break-all">{currentImageUrl}</p>
+                  <div className="rounded-lg overflow-hidden border mt-1">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={currentImageUrl} alt="マッププレビュー" className="w-full h-auto max-h-48 object-contain bg-gray-50" />
+                  </div>
+                </>
+              ) : (
+                <p className="text-sm text-text-sub">未設定</p>
+              )}
+            </div>
+
             <label className="flex flex-col gap-1">
-              <span className="text-sm font-medium">マップ画像URL</span>
+              <span className="text-sm font-medium">新しいURLに変更する場合</span>
               <input
                 name="imageUrl"
                 type="url"
-                defaultValue={(map!.imageUrl as string) ?? ""}
                 className="border rounded-lg px-3 py-2 text-sm"
                 placeholder="https://..."
               />
             </label>
-            {!!(map!.imageUrl) && (
-              <div className="rounded-lg overflow-hidden border">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={map!.imageUrl as string} alt="マッププレビュー" className="w-full h-auto max-h-48 object-contain bg-gray-50" />
-              </div>
-            )}
           </section>
 
           <section className="flex flex-col gap-3">
             <h2 className="text-base font-semibold border-b pb-1">デジタルパンフレット (PDF)</h2>
+
+            <div className="flex flex-col gap-1">
+              <span className="text-xs text-text-sub font-medium">現在の設定値</span>
+              {currentPdfUrl ? (
+                <p className="text-sm text-text-main break-all">{currentPdfUrl}</p>
+              ) : (
+                <p className="text-sm text-text-sub">未設定</p>
+              )}
+            </div>
+
             <label className="flex flex-col gap-1">
-              <span className="text-sm font-medium">PDF URL</span>
+              <span className="text-sm font-medium">新しいURLに変更する場合</span>
               <input
                 name="pdfUrl"
                 type="url"
-                defaultValue={(digital!.pdfUrl as string) ?? ""}
                 className="border rounded-lg px-3 py-2 text-sm"
                 placeholder="https://..."
               />
             </label>
-            {!!(digital!.pdfUrl) && (
-              <div className="bg-surface border rounded-lg p-3 text-xs text-text-sub break-all">
-                現在: {String(digital!.pdfUrl)}
-              </div>
-            )}
           </section>
+
+          <p className="text-xs text-text-sub">入力がない項目は変更されません。</p>
 
           <button type="submit" className="w-full py-2.5 rounded-lg bg-primary text-white font-bold text-sm">
             保存

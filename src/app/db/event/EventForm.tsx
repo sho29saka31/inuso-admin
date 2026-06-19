@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { CalendarPicker } from "./CalendarPicker";
 
 interface EventFormProps {
@@ -19,15 +19,13 @@ interface EventFormProps {
 }
 
 export function EventForm({ action, defaultValues = {}, isEdit = false }: EventFormProps) {
-  const [pending, setPending] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!confirm(isEdit ? "変更を保存しますか？" : "イベントを作成しますか？")) return;
-    setPending(true);
     const fd = new FormData(e.currentTarget);
-    await action(fd);
-    setPending(false);
+    startTransition(async () => { await action(fd); });
   }
 
   return (
@@ -78,8 +76,8 @@ export function EventForm({ action, defaultValues = {}, isEdit = false }: EventF
 
       <div className="flex gap-3 mt-2">
         <a href="/db/event" className="flex-1 text-center py-2 rounded-lg border text-sm">キャンセル</a>
-        <button type="submit" disabled={pending} className="flex-1 py-2 rounded-lg bg-primary text-white font-bold text-sm disabled:opacity-60">
-          {pending ? "保存中…" : isEdit ? "保存" : "作成"}
+        <button type="submit" disabled={isPending} className="flex-1 py-2 rounded-lg bg-primary text-white font-bold text-sm disabled:opacity-60">
+          {isPending ? "保存中…" : isEdit ? "保存" : "作成"}
         </button>
       </div>
     </form>

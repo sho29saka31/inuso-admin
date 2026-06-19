@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 
 const CATEGORIES = [
   { value: "class", label: "クラス" },
   { value: "club", label: "部活動" },
   { value: "eat", label: "飲食" },
   { value: "act", label: "有志" },
+  { value: "committee", label: "委員会" },
 ];
 
 const STATUS_OPTIONS = [
@@ -37,17 +38,17 @@ interface BoothFormProps {
 
 export function BoothForm({ action, defaultValues = {}, isEdit = false }: BoothFormProps) {
   const [category, setCategory] = useState(defaultValues.category ?? "class");
-  const [pending, setPending] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
   const isEat = category === "eat";
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!confirm(isEdit ? "変更を保存しますか？" : "新規作成しますか？")) return;
-    setPending(true);
     const fd = new FormData(e.currentTarget);
-    await action(fd);
-    setPending(false);
+    startTransition(async () => {
+      await action(fd);
+    });
   }
 
   return (
@@ -67,8 +68,7 @@ export function BoothForm({ action, defaultValues = {}, isEdit = false }: BoothF
           name="boothId"
           defaultValue={defaultValues.boothId ?? ""}
           required
-          disabled={isEdit}
-          className="border rounded-lg px-3 py-2 text-sm disabled:bg-gray-100"
+          className="border rounded-lg px-3 py-2 text-sm"
           placeholder="例: class1-1"
         />
       </label>
@@ -79,8 +79,7 @@ export function BoothForm({ action, defaultValues = {}, isEdit = false }: BoothF
           name="category"
           value={category}
           onChange={(e) => setCategory(e.target.value)}
-          disabled={isEdit}
-          className="border rounded-lg px-3 py-2 text-sm disabled:bg-gray-100"
+          className="border rounded-lg px-3 py-2 text-sm"
         >
           {CATEGORIES.map((c) => (
             <option key={c.value} value={c.value}>{c.label}</option>
@@ -95,8 +94,7 @@ export function BoothForm({ action, defaultValues = {}, isEdit = false }: BoothF
             <select
               name="type"
               defaultValue={defaultValues.type ?? "car"}
-              disabled={isEdit}
-              className="border rounded-lg px-3 py-2 text-sm disabled:bg-gray-100"
+              className="border rounded-lg px-3 py-2 text-sm"
             >
               <option value="car">キッチンカー</option>
               <option value="pta">PTAバザー</option>
@@ -209,10 +207,10 @@ export function BoothForm({ action, defaultValues = {}, isEdit = false }: BoothF
         </a>
         <button
           type="submit"
-          disabled={pending}
+          disabled={isPending}
           className="flex-1 py-2 rounded-lg bg-primary text-white font-bold text-sm disabled:opacity-60"
         >
-          {pending ? "保存中…" : isEdit ? "保存" : "作成"}
+          {isPending ? "保存中…" : isEdit ? "保存" : "作成"}
         </button>
       </div>
     </form>
