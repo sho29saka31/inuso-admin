@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 
 interface Product {
   name: string;
@@ -16,7 +16,7 @@ interface EatFormProps {
 }
 
 export function EatForm({ action, defaultValues = {} }: EatFormProps) {
-  const [pending, setPending] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const [products, setProducts] = useState<Product[]>(
     defaultValues.products && defaultValues.products.length > 0
       ? defaultValues.products
@@ -40,14 +40,13 @@ export function EatForm({ action, defaultValues = {} }: EatFormProps) {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!confirm("変更を保存しますか？")) return;
-    setPending(true);
+
     const fd = new FormData(e.currentTarget);
     products.forEach((p, i) => {
       fd.set(`product_name_${i}`, p.name);
       fd.set(`product_price_${i}`, String(p.price));
     });
-    await action(fd);
-    setPending(false);
+    startTransition(async () => { await action(fd); });
   }
 
   return (
@@ -100,8 +99,8 @@ export function EatForm({ action, defaultValues = {} }: EatFormProps) {
 
       <div className="flex gap-3 mt-2">
         <a href="/db/eat" className="flex-1 text-center py-2 rounded-lg border text-sm">キャンセル</a>
-        <button type="submit" disabled={pending} className="flex-1 py-2 rounded-lg bg-primary text-white font-bold text-sm disabled:opacity-60">
-          {pending ? "保存中…" : "保存"}
+        <button type="submit" disabled={isPending} className="flex-1 py-2 rounded-lg bg-primary text-white font-bold text-sm disabled:opacity-60">
+          {isPending ? "保存中…" : "保存"}
         </button>
       </div>
     </form>
