@@ -11,6 +11,7 @@ const mPlusRounded = M_PLUS_Rounded_1c({
 export const metadata: Metadata = {
   title: "ISF",
   description: "犬山総合高等学校 文化祭アプリ",
+  icons: { icon: "/logo.png", apple: "/logo.png" },
 };
 
 export default function RootLayout({
