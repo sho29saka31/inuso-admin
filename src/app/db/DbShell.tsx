@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { logoutAction } from "./actions";
@@ -18,14 +17,18 @@ export function DbShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isLogin = pathname === "/db";
 
+  async function handleLogout() {
+    if (!confirm("ログアウトしますか？")) return;
+    await logoutAction();
+  }
+
   return (
     <div className="min-h-screen flex flex-col">
       {!isLogin && (
         <>
           <header className="bg-primary text-white px-4 py-3 flex items-center justify-between sticky top-0 z-10">
-            <Link href="/db/booth" className="flex items-center gap-2">
-              <Image src="/logo.png" alt="ISF" width={56} height={24} className="h-6 w-auto object-contain brightness-0 invert" priority />
-              <span className="font-bold text-sm">DB管理</span>
+            <Link href="/db/booth" className="font-bold text-sm">
+              DB管理
             </Link>
             <div className="flex items-center gap-3">
               <Link href="/db/changelog" className="text-sm opacity-80 hover:opacity-100 flex items-center gap-1">
@@ -34,11 +37,9 @@ export function DbShell({ children }: { children: React.ReactNode }) {
                 </svg>
                 変更ログ
               </Link>
-              <form action={logoutAction}>
-                <button type="submit" className="text-sm opacity-80 hover:opacity-100">
-                  ログアウト
-                </button>
-              </form>
+              <button type="button" onClick={handleLogout} className="text-sm opacity-80 hover:opacity-100">
+                ログアウト
+              </button>
             </div>
           </header>
 

@@ -47,11 +47,11 @@ export default async function NoticeListPage() {
             const type = (n.type as string) ?? (n.isUrgent ? "urgent" : "info");
             return (
               <div key={n.noticeId} className="bg-surface rounded-lg border p-4 flex items-start justify-between gap-4">
-                <div className="flex flex-col gap-0.5">
-                  <div className="flex items-center gap-2">
-                    <span className={`text-xs px-1.5 py-0.5 rounded font-bold ${TYPE_BADGE[type] ?? TYPE_BADGE.info}`}>
-                      {TYPE_LABEL[type] ?? type}
-                    </span>
+                <div className="flex flex-col gap-0.5 min-w-0">
+                  <span className={`text-xs px-1.5 py-0.5 rounded font-bold w-fit ${TYPE_BADGE[type] ?? TYPE_BADGE.info}`}>
+                    {TYPE_LABEL[type] ?? type}
+                  </span>
+                  <div>
                     <span className="font-medium text-sm">{n.title}</span>
                   </div>
                   <span className="text-xs text-text-sub">{n.target} / {n.authorId}</span>
