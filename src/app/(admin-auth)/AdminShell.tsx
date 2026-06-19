@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 
 const NAV_ITEMS = [
   { href: "/admin/booth", label: "ブース" },
+  { href: "/admin/eat", label: "飲食" },
   { href: "/admin/event", label: "イベント" },
   { href: "/admin/notice", label: "通知" },
   { href: "/admin/logs", label: "ログ" },
