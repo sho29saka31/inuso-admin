@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { logoutAction } from "./actions";
@@ -22,8 +23,9 @@ export function DbShell({ children }: { children: React.ReactNode }) {
       {!isLogin && (
         <>
           <header className="bg-primary text-white px-4 py-3 flex items-center justify-between sticky top-0 z-10">
-            <Link href="/db/booth" className="font-bold text-base">
-              ISF DB管理
+            <Link href="/db/booth" className="flex items-center gap-2">
+              <Image src="/logo.png" alt="ISF" width={56} height={24} className="h-6 w-auto object-contain brightness-0 invert" priority />
+              <span className="font-bold text-sm">DB管理</span>
             </Link>
             <div className="flex items-center gap-3">
               <Link href="/db/changelog" className="text-sm opacity-80 hover:opacity-100 flex items-center gap-1">

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -27,8 +28,9 @@ export function AdminShell({
   return (
     <div className="min-h-screen flex flex-col">
       <header className="bg-primary text-white px-4 py-3 flex items-center justify-between sticky top-0 z-10">
-        <Link href="/admin/booth" className="font-bold text-base">
-          ISF 運営管理
+        <Link href="/admin/booth" className="flex items-center gap-2">
+          <Image src="/logo.png" alt="ISF" width={56} height={24} className="h-6 w-auto object-contain brightness-0 invert" priority />
+          <span className="font-bold text-sm">運営管理</span>
         </Link>
         <div className="flex items-center gap-3">
           <span className="text-sm opacity-80">{operatorId}</span>
