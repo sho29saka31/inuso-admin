@@ -1,14 +1,16 @@
 import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
 
-const nextConfig: NextConfig = {};
+const nextConfig: NextConfig = {
+  env: {
+    BUILD_TIME: new Date().toISOString(),
+  },
+};
 
 export default withSentryConfig(nextConfig, {
   // For all available options, see:
   // https://www.npmjs.com/package/@sentry/webpack-plugin#options
-
   org: "isf-webapp",
-
   project: "admin",
 
   // Only print logs for uploading source maps in CI
