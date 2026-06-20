@@ -17,7 +17,6 @@ const NON_TEACHER_TARGETS = ALL_TARGETS.filter((t) => t.value !== "prof");
 
 // 教員用発信元（先生・PTA含む全選択肢）
 const TEACHER_AUTHOR_OPTIONS = [
-  { value: "", label: "選択してください", disabled: true },
   { value: "1-1", label: "1年1組" }, { value: "1-2", label: "1年2組" },
   { value: "1-3", label: "1年3組" }, { value: "1-4", label: "1年4組" },
   { value: "2-1", label: "2年1組" }, { value: "2-2", label: "2年2組" },
@@ -145,8 +144,9 @@ export default function AdminNoticeClient({ scope }: { scope: string }) {
                 onChange={(e) => { setAuthorSelect(e.target.value); setTeacherName(""); setOtherName(""); }}
                 className="border rounded-lg px-3 py-2 text-sm"
               >
+                <option value="" disabled>選択してください</option>
                 {authorOptions.map((opt) => (
-                  <option key={opt.value} value={opt.value} disabled={"disabled" in opt && opt.disabled}>{opt.label}</option>
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
               </select>
               {isTeacher && (
