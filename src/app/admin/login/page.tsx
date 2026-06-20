@@ -133,7 +133,7 @@ export default function AdminLoginPage() {
               onChange={(e) => setScope(e.target.value)}
               className="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             >
-              <option value="">選択してください</option>
+              <option value="" disabled>選択してください</option>
               {SCOPE_GROUPS.map((g) => (
                 <optgroup key={g.group} label={g.group}>
                   {g.items.map((item) => (
