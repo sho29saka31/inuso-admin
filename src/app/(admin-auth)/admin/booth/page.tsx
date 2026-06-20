@@ -15,8 +15,10 @@ const STATUS_COLORS = [
 async function getBooths() {
   try {
     const db = getDb();
-    const snap = await db.collection("booths").orderBy("boothId").get();
-    return snap.docs.map((d) => d.data());
+    const snap = await db.collection("booths").get();
+    return snap.docs
+      .map((d) => ({ boothId: d.id, ...d.data() }))
+      .sort((a, b) => String(a.boothId ?? "").localeCompare(String(b.boothId ?? "")));
   } catch {
     return null;
   }

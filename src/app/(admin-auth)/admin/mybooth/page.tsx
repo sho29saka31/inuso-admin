@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 import Link from "next/link";
 import { getDb } from "@/lib/firebase-admin";
 import { getAdminScope } from "@/lib/admin-auth";
-import { isFullAccess, getScopeBoothTerm, getScopeLabel } from "@/lib/admin-scope";
+import { isFullAccess, getScopeLabel } from "@/lib/admin-scope";
 
 const STATUS_LABELS = ["停止中", "非常に閑散", "閑散", "通常", "混雑", "非常に混雑"];
 const STATUS_COLORS = [
@@ -14,21 +14,29 @@ const STATUS_COLORS = [
   "bg-red-50 text-red-600",
 ];
 
+const SCOPE_TO_BOOTH_ID: Record<string, string> = {
+  "1-1": "class1-1", "1-2": "class1-2", "1-3": "class1-3", "1-4": "class1-4",
+  "2-1": "class2-1", "2-2": "class2-2", "2-3": "class2-3", "2-4": "class2-4",
+  "3-1": "class3-1", "3-2": "class3-2", "3-3": "class3-3", "3-4": "class3-4",
+  "eスポーツ部": "club-game",
+  "美術部": "club-art",
+  "有志発表": "pe-gym",
+};
+
 function boothMatchesScope(booth: Record<string, unknown>, scope: string): boolean {
   if (isFullAccess(scope)) return true;
-  // 飲食ブースはtypeフィールドでマッチ
-  if (scope === "キッチンカー") return (booth.type as string) === "kitchencar";
+  if (scope === "キッチンカー") return (booth.type as string) === "car";
   if (scope === "PTAバザー") return (booth.type as string) === "pta";
-  const term = getScopeBoothTerm(scope).toLowerCase();
-  const name = ((booth.name ?? booth.shopName ?? "") as string).toLowerCase();
-  return name.includes(term);
+  const targetId = SCOPE_TO_BOOTH_ID[scope];
+  if (targetId) return (booth.boothId as string) === targetId;
+  return false;
 }
 
 async function getBooths(scope: string) {
   try {
     const db = getDb();
-    const snap = await db.collection("booths").orderBy("boothId").get();
-    const all = snap.docs.map((d) => d.data());
+    const snap = await db.collection("booths").get();
+    const all = snap.docs.map((d) => ({ boothId: d.id, ...d.data() }));
     return isFullAccess(scope) ? all : all.filter((b) => boothMatchesScope(b, scope));
   } catch {
     return null;

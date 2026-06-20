@@ -20,12 +20,11 @@ const TYPE_LABELS: Record<string, string> = {
 async function getEatBooths() {
   try {
     const db = getDb();
-    const snap = await db
-      .collection("booths")
-      .where("category", "==", "eat")
-      .orderBy("boothId")
-      .get();
-    return snap.docs.map((d) => d.data());
+    const snap = await db.collection("booths").get();
+    return snap.docs
+      .map((d) => d.data())
+      .filter((b) => b.category === "eat")
+      .sort((a, b) => String(a.boothId ?? "").localeCompare(String(b.boothId ?? "")));
   } catch {
     return null;
   }
