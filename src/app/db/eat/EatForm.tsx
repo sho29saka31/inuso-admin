@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { useConfirm } from "@/hooks/useConfirm";
 
 interface Product {
   name: string;
@@ -17,6 +19,7 @@ interface EatFormProps {
 
 export function EatForm({ action, defaultValues = {} }: EatFormProps) {
   const [isPending, startTransition] = useTransition();
+  const { confirm, confirmState, handleResult } = useConfirm();
   const [products, setProducts] = useState<Product[]>(
     defaultValues.products && defaultValues.products.length > 0
       ? defaultValues.products
@@ -39,7 +42,7 @@ export function EatForm({ action, defaultValues = {} }: EatFormProps) {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!confirm("変更を保存しますか？")) return;
+    const ok = await confirm("変更を保存しますか？"); if (!ok) return;
 
     const fd = new FormData(e.currentTarget);
     products.forEach((p, i) => {
@@ -103,6 +106,7 @@ export function EatForm({ action, defaultValues = {} }: EatFormProps) {
           {isPending ? "保存中…" : "保存"}
         </button>
       </div>
+      {confirmState && <ConfirmDialog message={confirmState.message} onConfirm={() => handleResult(true)} onCancel={() => handleResult(false)} />}
     </form>
   );
 }
