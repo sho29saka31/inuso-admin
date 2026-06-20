@@ -5,6 +5,8 @@ const nextConfig: NextConfig = {};
 
 export default withSentryConfig(nextConfig, {
   silent: true,
-  disableLogger: true,
-  automaticVercelMonitors: false,
+  webpack: {
+    treeshake: { removeDebugLogging: true },
+    automaticVercelMonitors: false,
+  },
 });

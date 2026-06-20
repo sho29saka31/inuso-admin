@@ -6,3 +6,5 @@ Sentry.init({
   integrations: [Sentry.browserTracingIntegration()],
   enabled: process.env.NODE_ENV === "production",
 });
+
+export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
