@@ -4,6 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { isFullAccess } from "@/lib/admin-scope";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { useConfirm } from "@/hooks/useConfirm";
 
 const TYPE_LABELS: Record<string, string> = {
   urgent: "緊急",
@@ -51,9 +53,10 @@ export default function NoticeHistoryClient({
 }) {
   const router = useRouter();
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const { confirm, confirmState, handleResult } = useConfirm();
 
   async function handleDelete(noticeId: string) {
-    if (!confirm("この通知を削除しますか？")) return;
+    const ok = await confirm("この通知を削除しますか？"); if (!ok) return;
     setDeletingId(noticeId);
     await fetch("/api/notice/delete", {
       method: "POST",
@@ -119,6 +122,7 @@ export default function NoticeHistoryClient({
           })}
         </div>
       )}
+      {confirmState && <ConfirmDialog message={confirmState.message} onConfirm={() => handleResult(true)} onCancel={() => handleResult(false)} />}
     </div>
   );
 }

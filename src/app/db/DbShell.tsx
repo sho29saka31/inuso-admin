@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { logoutAction } from "./actions";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { useConfirm } from "@/hooks/useConfirm";
 
 const NAV_ITEMS = [
   { href: "/db/booth", label: "ブース" },
@@ -16,9 +18,10 @@ const NAV_ITEMS = [
 export function DbShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isLogin = pathname === "/db";
+  const { confirm, confirmState, handleResult } = useConfirm();
 
   async function handleLogout() {
-    if (!confirm("ログアウトしますか？")) return;
+    const ok = await confirm("ログアウトしますか？"); if (!ok) return;
     await logoutAction();
   }
 
@@ -67,6 +70,7 @@ export function DbShell({ children }: { children: React.ReactNode }) {
       )}
 
       <main className="flex-1 p-4 max-w-3xl w-full mx-auto">{children}</main>
+      {confirmState && <ConfirmDialog message={confirmState.message} onConfirm={() => handleResult(true)} onCancel={() => handleResult(false)} />}
     </div>
   );
 }
