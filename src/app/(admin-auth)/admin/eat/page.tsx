@@ -12,29 +12,35 @@ const STATUS_COLORS = [
   "bg-red-50 text-red-600",
 ];
 
-async function getBooths() {
+const TYPE_LABELS: Record<string, string> = {
+  kitchencar: "キッチンカー",
+  pta: "PTAバザー",
+};
+
+async function getEatBooths() {
   try {
     const db = getDb();
     const snap = await db.collection("booths").get();
     return snap.docs
-      .map((d) => { const data = d.data(); if (!data.boothId) data.boothId = d.id; return data; })
+      .map((d) => d.data())
+      .filter((b) => b.category === "eat")
       .sort((a, b) => String(a.boothId ?? "").localeCompare(String(b.boothId ?? "")));
   } catch {
     return null;
   }
 }
 
-export default async function AdminBoothPage() {
-  const booths = await getBooths();
+export default async function AdminEatPage() {
+  const booths = await getEatBooths();
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-xl font-bold">ブース一覧</h1>
+      <h1 className="text-xl font-bold">飲食一覧</h1>
 
       {booths === null ? (
         <p className="text-danger text-sm">Firebase未設定。</p>
       ) : booths.length === 0 ? (
-        <p className="text-text-sub text-sm">ブースがありません。</p>
+        <p className="text-text-sub text-sm">飲食ブースがありません。</p>
       ) : (
         <div className="flex flex-col gap-2">
           {booths.map((b) => (
@@ -43,7 +49,14 @@ export default async function AdminBoothPage() {
               className="bg-white rounded-xl border p-4 flex items-center justify-between gap-4"
             >
               <div className="flex flex-col gap-1 min-w-0">
-                <span className="font-medium text-sm truncate">{b.name ?? b.shopName}</span>
+                <div className="flex items-center gap-2 flex-wrap">
+                  {b.type && (
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 font-medium shrink-0">
+                      {TYPE_LABELS[b.type] ?? b.type}
+                    </span>
+                  )}
+                </div>
+                <span className="font-medium text-sm truncate">{b.shopName ?? b.name}</span>
                 <div className="flex items-center gap-2 flex-wrap">
                   <span
                     className={`text-xs px-2 py-0.5 rounded-full font-medium ${
@@ -59,7 +72,7 @@ export default async function AdminBoothPage() {
                 </div>
               </div>
               <Link
-                href={`/admin/booth/${b.boothId}`}
+                href={`/admin/eat/${b.boothId}`}
                 className="shrink-0 text-xs px-3 py-1.5 rounded-lg border border-primary text-primary font-medium"
               >
                 編集

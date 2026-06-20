@@ -9,18 +9,21 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { eventId, isDelayed, delayMinutes } = await req.json();
+  const { eventId, startTime, endTime, location, isDelayed, delayMinutes } = await req.json();
   if (!eventId) {
     return NextResponse.json({ error: "eventId required" }, { status: 400 });
   }
 
   const db = getDb();
   const now = nowTimestamp();
-  const fields = {
+  const fields: Record<string, unknown> = {
     isDelayed: Boolean(isDelayed),
     delayMinutes: Number(delayMinutes ?? 0),
     updatedAt: now,
   };
+  if (startTime !== undefined) fields.startTime = startTime;
+  if (endTime !== undefined) fields.endTime = endTime;
+  if (location !== undefined) fields.location = location;
 
   await db.collection("events").doc(eventId).update(fields);
   await saveChangeLog({
