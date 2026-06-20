@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { isFullAccess, isClassScope, getScopeLabel } from "@/lib/admin-scope";
+import LoadingOverlay from "@/components/LoadingOverlay";
 
 const ALL_TARGETS = [
   { value: "all", label: "全ユーザー (all)" },
@@ -126,6 +127,8 @@ export default function AdminNoticeClient({ scope }: { scope: string }) {
   }
 
   return (
+    <>
+    <LoadingOverlay visible={saving} />
     <div className="flex flex-col gap-6">
       <h1 className="text-xl font-bold">通知送信</h1>
 
@@ -232,5 +235,6 @@ export default function AdminNoticeClient({ scope }: { scope: string }) {
         </button>
       </form>
     </div>
+    </>
   );
 }
