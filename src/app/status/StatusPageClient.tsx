@@ -13,7 +13,7 @@ interface BoothStatus {
 
 interface StatusData {
   serverTime: string;
-  deploy: { sha: string | null; message: string | null };
+  deploy: { sha: string | null; deployedAt: string | null };
   firestore: {
     ok: boolean;
     config?: {
@@ -133,8 +133,8 @@ export default function StatusPageClient() {
           <dd className="font-mono text-xs truncate">
             {data.deploy.sha ? data.deploy.sha.slice(0, 8) : "—"}
           </dd>
-          <dt className="text-gray-400">メッセージ</dt>
-          <dd className="truncate">{data.deploy.message ?? "—"}</dd>
+          <dt className="text-gray-400">デプロイ日時</dt>
+          <dd>{data.deploy.deployedAt ?? "—"}</dd>
         </dl>
       </SectionCard>
 
