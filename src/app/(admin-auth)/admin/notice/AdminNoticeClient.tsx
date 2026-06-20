@@ -15,7 +15,8 @@ const ALL_TARGETS = [
 
 const NON_TEACHER_TARGETS = ALL_TARGETS.filter((t) => t.value !== "prof");
 
-const AUTHOR_OPTIONS = [
+// 教員用発信元（先生・PTA含む全選択肢）
+const TEACHER_AUTHOR_OPTIONS = [
   { value: "", label: "選択してください" },
   { value: "1-1", label: "1年1組" }, { value: "1-2", label: "1年2組" },
   { value: "1-3", label: "1年3組" }, { value: "1-4", label: "1年4組" },
@@ -25,10 +26,26 @@ const AUTHOR_OPTIONS = [
   { value: "3-3", label: "3年3組" }, { value: "3-4", label: "3年4組" },
   { value: "eスポーツ部", label: "eスポーツ部" },
   { value: "美術部", label: "美術部" },
-  { value: "有志発表", label: "有志発表" },
   { value: "__teacher__", label: "先生" },
   { value: "実行委員", label: "実行委員会" },
   { value: "キッチンカー", label: "キッチンカー" },
+  { value: "PTAバザー", label: "PTAバザー" },
+  { value: "__other__", label: "その他" },
+];
+
+// 実行委員用発信元（先生なし）
+const EXEC_AUTHOR_OPTIONS = [
+  { value: "1-1", label: "1年1組" }, { value: "1-2", label: "1年2組" },
+  { value: "1-3", label: "1年3組" }, { value: "1-4", label: "1年4組" },
+  { value: "2-1", label: "2年1組" }, { value: "2-2", label: "2年2組" },
+  { value: "2-3", label: "2年3組" }, { value: "2-4", label: "2年4組" },
+  { value: "3-1", label: "3年1組" }, { value: "3-2", label: "3年2組" },
+  { value: "3-3", label: "3年3組" }, { value: "3-4", label: "3年4組" },
+  { value: "eスポーツ部", label: "eスポーツ部" },
+  { value: "美術部", label: "美術部" },
+  { value: "実行委員", label: "実行委員会" },
+  { value: "キッチンカー", label: "キッチンカー" },
+  { value: "PTAバザー", label: "PTAバザー" },
   { value: "__other__", label: "その他" },
 ];
 
@@ -41,7 +58,11 @@ const TYPE_OPTIONS = [
 
 export default function AdminNoticeClient({ scope }: { scope: string }) {
   const scopeLocked = !isFullAccess(scope);
-  const initialAuthor = scopeLocked ? scope : "";
+  const isTeacherScope = scope === "教員";
+  const isExecScope = scope === "実行委員";
+
+  // デフォルト発信元: 教員→先生, 実行委員→実行委員会, それ以外→固定
+  const initialAuthor = scopeLocked ? scope : isTeacherScope ? "__teacher__" : "実行委員";
 
   const [authorSelect, setAuthorSelect] = useState(initialAuthor);
   const [teacherName, setTeacherName] = useState("");
@@ -56,7 +77,12 @@ export default function AdminNoticeClient({ scope }: { scope: string }) {
 
   const isTeacher = authorSelect === "__teacher__";
   const isOther = authorSelect === "__other__";
-  const targets = isFullAccess(scope) ? ALL_TARGETS : NON_TEACHER_TARGETS;
+
+  // 送信対象: 教員のみ先生を含む
+  const targets = isTeacherScope ? ALL_TARGETS : NON_TEACHER_TARGETS;
+
+  // 発信元選択肢
+  const authorOptions = isTeacherScope ? TEACHER_AUTHOR_OPTIONS : EXEC_AUTHOR_OPTIONS;
 
   function resolvedAuthorId() {
     if (isTeacher) return teacherName;
@@ -91,7 +117,7 @@ export default function AdminNoticeClient({ scope }: { scope: string }) {
       setSuccess("通知を送信しました");
       setTitle("");
       setBody("");
-      if (!scopeLocked) setAuthorSelect("");
+      if (!scopeLocked) setAuthorSelect(isTeacherScope ? "__teacher__" : "実行委員");
       setTarget("all");
       setType("info");
     } else {
@@ -119,7 +145,7 @@ export default function AdminNoticeClient({ scope }: { scope: string }) {
                 onChange={(e) => { setAuthorSelect(e.target.value); setTeacherName(""); setOtherName(""); }}
                 className="border rounded-lg px-3 py-2 text-sm"
               >
-                {AUTHOR_OPTIONS.map((opt) => (
+                {authorOptions.map((opt) => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
               </select>

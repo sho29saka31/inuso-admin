@@ -40,11 +40,10 @@ const SCOPE_GROUPS = [
     ],
   },
   {
-    group: "部活・有志",
+    group: "部活",
     items: [
       { value: "eスポーツ部", label: "eスポーツ部" },
       { value: "美術部", label: "美術部" },
-      { value: "有志発表", label: "有志発表" },
     ],
   },
   {
