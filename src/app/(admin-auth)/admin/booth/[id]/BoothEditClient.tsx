@@ -10,6 +10,7 @@ export function BoothEditClient({ booth }: { booth: Record<string, unknown> }) {
   const name = (booth.name ?? booth.shopName) as string;
   const [status, setStatus] = useState(Number(booth.status ?? 3));
   const [waitCount, setWaitCount] = useState(Number(booth.waitCount ?? 0));
+  const [isManual, setIsManual] = useState(Boolean(booth.isManual ?? false));
   const [confirming, setConfirming] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -20,7 +21,7 @@ export function BoothEditClient({ booth }: { booth: Record<string, unknown> }) {
     const res = await fetch("/api/booth/update", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ boothId: booth.boothId, status, waitCount }),
+      body: JSON.stringify({ boothId: booth.boothId, status, waitCount, isManual }),
     });
     setSaving(false);
     if (res.ok) {
@@ -35,12 +36,33 @@ export function BoothEditClient({ booth }: { booth: Record<string, unknown> }) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-xl font-bold">{name}</h1>
-        <p className="text-sm text-text-sub">{booth.boothId as string}</p>
-      </div>
+      <h1 className="text-xl font-bold">{name}</h1>
 
       <div className="flex flex-col gap-4">
+        <div className="flex items-center justify-between rounded-xl border p-4 bg-white">
+          <div className="flex flex-col gap-0.5">
+            <span className="text-sm font-medium">更新モード</span>
+            <span className="text-xs text-text-sub">
+              {isManual ? "手動 — Bluetooth自動更新を無視" : "自動 — Bluetoothで自動更新"}
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setIsManual((v) => !v)}
+            className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ${
+              isManual ? "bg-primary" : "bg-gray-200"
+            }`}
+            role="switch"
+            aria-checked={isManual}
+          >
+            <span
+              className={`inline-block h-5 w-5 rounded-full bg-white shadow transition-transform duration-200 ${
+                isManual ? "translate-x-5" : "translate-x-0"
+              }`}
+            />
+          </button>
+        </div>
+
         <div className="flex flex-col gap-2">
           <label className="text-sm font-medium">混雑状態</label>
           <select
@@ -78,15 +100,17 @@ export function BoothEditClient({ booth }: { booth: Record<string, unknown> }) {
         </div>
       </div>
 
+      <p className="text-xs text-text-sub border rounded-lg p-3 bg-gray-50">
+        他の物を編集したい場合はDB管理者までお声がけください。
+      </p>
+
       {error && <p className="text-xs text-danger">{error}</p>}
 
       {confirming ? (
         <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 flex flex-col gap-3">
-          <p className="text-sm font-medium">
-            「{name}」のステータスを更新しますか？
-          </p>
+          <p className="text-sm font-medium">「{name}」のステータスを更新しますか？</p>
           <p className="text-xs text-text-sub">
-            状態: {STATUS_LABELS[status]} / 待ち: {waitCount}組
+            モード: {isManual ? "手動" : "自動"} / 状態: {STATUS_LABELS[status]} / 待ち: {waitCount}組
           </p>
           <div className="flex gap-2">
             <button

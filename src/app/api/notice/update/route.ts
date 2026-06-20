@@ -9,26 +9,26 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { boothId, status, waitCount, isManual, products } = await req.json();
-  if (!boothId) {
-    return NextResponse.json({ error: "boothId required" }, { status: 400 });
+  const { noticeId, authorId, title, body, target, type } = await req.json();
+  if (!noticeId || !authorId || !title || !body) {
+    return NextResponse.json({ error: "noticeId, authorId, title, body required" }, { status: 400 });
   }
 
   const db = getDb();
-  const now = nowTimestamp();
-  const fields: Record<string, unknown> = {
-    status: Number(status),
-    waitCount: Number(waitCount),
-    updatedAt: now,
+  const fields = {
+    authorId,
+    title,
+    body,
+    target: target ?? "all",
+    type: type ?? "info",
+    updatedAt: nowTimestamp(),
   };
-  if (isManual !== undefined) fields.isManual = Boolean(isManual);
-  if (products !== undefined) fields.products = products;
 
-  await db.collection("booths").doc(boothId).update(fields);
+  await db.collection("notices").doc(noticeId).update(fields);
   await saveChangeLog({
     operatorId,
-    targetCollection: "booths",
-    targetId: boothId,
+    targetCollection: "notices",
+    targetId: noticeId,
     changeType: "update",
     changedFields: fields,
   });
@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
     await fetch(viewerUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ secret: viewerSecret, paths: ["/busy", "/booth"] }),
+      body: JSON.stringify({ secret: viewerSecret, paths: ["/notice", "/top"] }),
     }).catch(() => {});
   }
 

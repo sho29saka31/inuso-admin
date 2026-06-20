@@ -2,22 +2,33 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { isFullAccess, getScopeLabel } from "@/lib/admin-scope";
 
-const NAV_ITEMS = [
-  { href: "/admin/booth", label: "ブース" },
+const FULL_NAV = [
+  { href: "/admin/mybooth", label: "マイブース" },
+  { href: "/admin/eat", label: "飲食" },
   { href: "/admin/event", label: "イベント" },
-  { href: "/admin/notice", label: "通知" },
-  { href: "/admin/logs", label: "ログ" },
+  { href: "/admin/notice", label: "通知送信" },
+  { href: "/admin/notice/history", label: "通知履歴" },
+];
+
+const LIMITED_NAV = [
+  { href: "/admin/mybooth", label: "マイブース" },
+  { href: "/admin/notice", label: "通知送信" },
+  { href: "/admin/notice/history", label: "通知履歴" },
 ];
 
 export function AdminShell({
   children,
   operatorId,
+  scope,
 }: {
   children: React.ReactNode;
   operatorId: string;
+  scope: string;
 }) {
   const pathname = usePathname();
+  const navItems = isFullAccess(scope) ? FULL_NAV : LIMITED_NAV;
 
   async function handleLogout() {
     if (!confirm("ログアウトしますか？")) return;
@@ -28,11 +39,16 @@ export function AdminShell({
   return (
     <div className="min-h-screen flex flex-col">
       <header className="bg-primary text-white px-4 py-3 flex items-center justify-between sticky top-0 z-10">
-        <Link href="/admin/booth" className="font-bold text-sm">
+        <Link href="/admin/mybooth" className="font-bold text-sm">
           運営管理
         </Link>
         <div className="flex items-center gap-3">
-          <span className="text-sm opacity-80">{operatorId}</span>
+          <div className="flex flex-col items-end">
+            <span className="text-sm opacity-80">{operatorId}</span>
+            {scope && (
+              <span className="text-xs opacity-60">{getScopeLabel(scope)}</span>
+            )}
+          </div>
           <button
             type="button"
             onClick={handleLogout}
@@ -45,8 +61,10 @@ export function AdminShell({
 
       <nav className="bg-white border-b px-2 overflow-x-auto">
         <div className="flex gap-1 py-1 min-w-max">
-          {NAV_ITEMS.map((item) => {
-            const active = pathname === item.href || pathname.startsWith(item.href + "/");
+          {navItems.map((item) => {
+            const active =
+              pathname === item.href ||
+              (item.href !== "/admin/notice" && pathname.startsWith(item.href + "/"));
             return (
               <Link
                 key={item.href}

@@ -36,9 +36,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "boothId and deviceCount required" }, { status: 400 });
   }
 
+  const db = getDb();
+
+  // 手動モードのブースはBluetoothによる自動更新をスキップ
+  const boothDoc = await db.collection("booths").doc(boothId).get();
+  if (boothDoc.exists && boothDoc.data()?.isManual) {
+    return NextResponse.json({ ok: true, skipped: true, reason: "manual mode" });
+  }
+
   const status = calcStatus(boothId, Number(deviceCount));
 
-  const db = getDb();
   const now = nowTimestamp();
   const fields: Record<string, unknown> = {
     status,
