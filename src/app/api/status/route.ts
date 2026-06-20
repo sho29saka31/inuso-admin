@@ -73,11 +73,11 @@ async function fetchLatestNotice() {
   };
 }
 
-async function fetchSentryIssues(project: string, period: string) {
+async function fetchSentryIssues(project: string, statsPeriod: string) {
   const token = process.env.SENTRY_API_TOKEN;
   if (!token) return null;
   const org = "shoki-6b";
-  const url = `https://sentry.io/api/0/projects/${org}/${project}/issues/?query=is:unresolved+lastSeen:>${period}&limit=100`;
+  const url = `https://sentry.io/api/0/projects/${org}/${project}/issues/?query=is%3Aunresolved&statsPeriod=${statsPeriod}&limit=100`;
   const res = await fetch(url, {
     headers: { Authorization: `Bearer ${token}` },
     next: { revalidate: 0 },
@@ -88,7 +88,7 @@ async function fetchSentryIssues(project: string, period: string) {
 }
 
 export async function GET() {
-  const serverTime = new Date().toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" });
+  const serverTime = new Date().toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" }) + " (JST)";
 
   const [firestoreResult, noticeResult] = await Promise.allSettled([
     fetchFirestoreStatus(),
@@ -105,10 +105,10 @@ export async function GET() {
   const boothResult = await Promise.allSettled([fetchBoothStatus(warnMinutes, alertMinutes)]);
 
   const [sentry1hViewer, sentry24hViewer, sentry1hAdmin, sentry24hAdmin] = await Promise.allSettled([
-    fetchSentryIssues("isf-viewer", "-1h"),
-    fetchSentryIssues("isf-viewer", "-24h"),
-    fetchSentryIssues("isf-admin", "-1h"),
-    fetchSentryIssues("isf-admin", "-24h"),
+    fetchSentryIssues("isf-viewer", "1h"),
+    fetchSentryIssues("isf-viewer", "24h"),
+    fetchSentryIssues("isf-admin", "1h"),
+    fetchSentryIssues("isf-admin", "24h"),
   ]);
 
   const booths =
@@ -126,7 +126,9 @@ export async function GET() {
     serverTime,
     deploy: {
       sha: process.env.VERCEL_GIT_COMMIT_SHA ?? null,
-      message: process.env.VERCEL_GIT_COMMIT_MESSAGE ?? null,
+      deployedAt: process.env.BUILD_TIME
+        ? new Date(process.env.BUILD_TIME).toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" }) + " (JST)"
+        : null,
     },
     firestore:
       firestoreResult.status === "fulfilled"

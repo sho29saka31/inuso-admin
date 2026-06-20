@@ -1,12 +1,14 @@
 import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
 
-const nextConfig: NextConfig = {};
+const nextConfig: NextConfig = {
+  env: {
+    BUILD_TIME: new Date().toISOString(),
+  },
+};
 
 export default withSentryConfig(nextConfig, {
   silent: true,
-  webpack: {
-    treeshake: { removeDebugLogging: true },
-    automaticVercelMonitors: false,
-  },
+  disableLogger: true,
+  automaticVercelMonitors: false,
 });
