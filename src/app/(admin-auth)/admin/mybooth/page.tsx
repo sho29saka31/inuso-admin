@@ -36,7 +36,7 @@ async function getBooths(scope: string) {
   try {
     const db = getDb();
     const snap = await db.collection("booths").get();
-    const all = snap.docs.map((d) => ({ boothId: d.id, ...d.data() }));
+    const all = snap.docs.map((d) => ({ boothId: d.id, ...(d.data() as Record<string, unknown>) }));
     return isFullAccess(scope) ? all : all.filter((b) => boothMatchesScope(b, scope));
   } catch {
     return null;

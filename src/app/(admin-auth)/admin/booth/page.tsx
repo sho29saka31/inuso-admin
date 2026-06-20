@@ -17,7 +17,7 @@ async function getBooths() {
     const db = getDb();
     const snap = await db.collection("booths").get();
     return snap.docs
-      .map((d) => ({ boothId: d.id, ...d.data() }))
+      .map((d) => ({ boothId: d.id, ...(d.data() as Record<string, unknown>) }))
       .sort((a, b) => String(a.boothId ?? "").localeCompare(String(b.boothId ?? "")));
   } catch {
     return null;
