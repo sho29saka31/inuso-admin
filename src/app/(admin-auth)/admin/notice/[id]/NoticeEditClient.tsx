@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { isFullAccess, getScopeLabel } from "@/lib/admin-scope";
+import LoadingOverlay from "@/components/LoadingOverlay";
 
 const ALL_TARGETS = [
   { value: "all", label: "全ユーザー (all)" },
@@ -71,6 +72,8 @@ export default function NoticeEditClient({
   }
 
   return (
+    <>
+    <LoadingOverlay visible={saving} />
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="text-xl font-bold">通知編集</h1>
@@ -152,5 +155,6 @@ export default function NoticeEditClient({
         </div>
       </form>
     </div>
+    </>
   );
 }

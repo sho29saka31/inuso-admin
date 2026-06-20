@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import LoadingOverlay from "@/components/LoadingOverlay";
 
 const STATUS_LABELS = ["停止中", "非常に閑散", "閑散", "通常", "混雑", "非常に混雑"];
 
@@ -74,6 +75,8 @@ export function EatStatusEditClient({ booth }: { booth: Record<string, unknown> 
   }
 
   return (
+    <>
+    <LoadingOverlay visible={saving} />
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="text-xl font-bold">{name}</h1>
@@ -222,5 +225,6 @@ export function EatStatusEditClient({ booth }: { booth: Record<string, unknown> 
         </button>
       )}
     </div>
+    </>
   );
 }

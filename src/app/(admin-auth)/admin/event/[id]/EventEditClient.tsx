@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import LoadingOverlay from "@/components/LoadingOverlay";
 
 export function EventEditClient({ event }: { event: Record<string, unknown> }) {
   const router = useRouter();
@@ -39,6 +40,8 @@ export function EventEditClient({ event }: { event: Record<string, unknown> }) {
   }
 
   return (
+    <>
+    <LoadingOverlay visible={saving} />
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="text-xl font-bold">{event.eventName as string}</h1>
@@ -157,5 +160,6 @@ export function EventEditClient({ event }: { event: Record<string, unknown> }) {
         </button>
       </div>
     </div>
+    </>
   );
 }
