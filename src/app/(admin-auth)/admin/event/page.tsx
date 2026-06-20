@@ -115,7 +115,7 @@ export default async function AdminEventPage() {
                       </div>
                       <p className="text-xs text-text-sub mt-0.5">{ev.location}</p>
                       {ev.details && (
-                        <p className="text-xs text-text-sub mt-1">{ev.details}</p>
+                        <p className="text-xs text-text-sub mt-1 whitespace-pre-wrap">{ev.details}</p>
                       )}
                     </div>
                     <Link
