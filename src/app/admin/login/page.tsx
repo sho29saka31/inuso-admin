@@ -8,8 +8,8 @@ const SCOPE_GROUPS = [
   {
     group: "教員・実行委員",
     items: [
-      { value: "全アクセス", label: "教員（全アクセス）" },
-      { value: "全アクセス", label: "実行委員（全アクセス）" },
+      { value: "教員", label: "教員（全アクセス）" },
+      { value: "実行委員", label: "実行委員（全アクセス）" },
     ],
   },
   {

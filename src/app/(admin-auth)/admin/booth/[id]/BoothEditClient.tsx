@@ -36,10 +36,7 @@ export function BoothEditClient({ booth }: { booth: Record<string, unknown> }) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-xl font-bold">{name}</h1>
-        <p className="text-sm text-text-sub">{booth.boothId as string}</p>
-      </div>
+      <h1 className="text-xl font-bold">{name}</h1>
 
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between rounded-xl border p-4 bg-white">

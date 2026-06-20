@@ -6,12 +6,10 @@ import { isFullAccess, getScopeLabel } from "@/lib/admin-scope";
 
 const FULL_NAV = [
   { href: "/admin/mybooth", label: "マイブース" },
-  { href: "/admin/booth", label: "ブース" },
   { href: "/admin/eat", label: "飲食" },
   { href: "/admin/event", label: "イベント" },
   { href: "/admin/notice", label: "通知送信" },
   { href: "/admin/notice/history", label: "通知履歴" },
-  { href: "/admin/logs", label: "ログ" },
 ];
 
 const LIMITED_NAV = [

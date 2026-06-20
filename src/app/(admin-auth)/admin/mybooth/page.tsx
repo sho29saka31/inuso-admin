@@ -16,6 +16,9 @@ const STATUS_COLORS = [
 
 function boothMatchesScope(booth: Record<string, unknown>, scope: string): boolean {
   if (isFullAccess(scope)) return true;
+  // 飲食ブースはtypeフィールドでマッチ
+  if (scope === "キッチンカー") return (booth.type as string) === "kitchencar";
+  if (scope === "PTAバザー") return (booth.type as string) === "pta";
   const term = getScopeBoothTerm(scope).toLowerCase();
   const name = ((booth.name ?? booth.shopName ?? "") as string).toLowerCase();
   return name.includes(term);

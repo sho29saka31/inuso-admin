@@ -12,7 +12,7 @@ const CLASS_TO_LABEL: Record<string, string> = {
 };
 
 export function isFullAccess(scope: string): boolean {
-  return scope === "全アクセス";
+  return scope === "教員" || scope === "実行委員";
 }
 
 export function isClassScope(scope: string): boolean {
@@ -26,7 +26,8 @@ export function getScopeBoothTerm(scope: string): string {
 
 /** スコープの表示ラベルを返す */
 export function getScopeLabel(scope: string): string {
-  if (scope === "全アクセス") return "全アクセス（教員・実行委員）";
+  if (scope === "教員") return "教員（全アクセス）";
+  if (scope === "実行委員") return "実行委員（全アクセス）";
   return CLASS_TO_LABEL[scope] ?? scope;
 }
 
