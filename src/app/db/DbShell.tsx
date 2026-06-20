@@ -11,7 +11,6 @@ const NAV_ITEMS = [
   { href: "/db/notice", label: "通知" },
   { href: "/db/files", label: "ファイル" },
   { href: "/db/config", label: "設定" },
-  { href: "/db/status", label: "ステータス" },
 ];
 
 export function DbShell({ children }: { children: React.ReactNode }) {
