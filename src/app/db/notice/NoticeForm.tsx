@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { useConfirm } from "@/hooks/useConfirm";
 
 const ALL_TARGETS = [
   { value: "all", label: "全ユーザー (all)" },
@@ -67,6 +69,7 @@ function guessAuthorSelect(authorId?: string): string {
 export function NoticeForm({ action, defaultValues = {}, isEdit = false }: NoticeFormProps) {
   const [noticeType, setNoticeType] = useState(defaultValues.type ?? "info");
   const [isPending, startTransition] = useTransition();
+  const { confirm, confirmState, handleResult } = useConfirm();
   const [authorSelect, setAuthorSelect] = useState(() => guessAuthorSelect(defaultValues.authorId));
   const [teacherName, setTeacherName] = useState(
     authorSelect === "__teacher__" ? (defaultValues.authorId ?? "") : ""
@@ -89,10 +92,10 @@ export function NoticeForm({ action, defaultValues = {}, isEdit = false }: Notic
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (isUrgent) {
-      if (!confirm("【緊急通知】内容を確認しましたか？")) return;
-      if (!confirm("本当に送信しますか？この操作は取り消せません。")) return;
+      const ok1 = await confirm("【緊急通知】内容を確認しましたか？"); if (!ok1) return;
+      const ok2 = await confirm("本当に送信しますか？この操作は取り消せません。"); if (!ok2) return;
     } else {
-      if (!confirm(isEdit ? "変更を保存しますか？" : "作成しますか？")) return;
+      const ok = await confirm(isEdit ? "変更を保存しますか？" : "作成しますか？"); if (!ok) return;
     }
     const fd = new FormData(e.currentTarget);
     fd.set("type", noticeType);
@@ -178,6 +181,7 @@ export function NoticeForm({ action, defaultValues = {}, isEdit = false }: Notic
           {isPending ? "保存中…" : isEdit ? "保存" : "作成"}
         </button>
       </div>
+      {confirmState && <ConfirmDialog message={confirmState.message} onConfirm={() => handleResult(true)} onCancel={() => handleResult(false)} />}
     </form>
   );
 }

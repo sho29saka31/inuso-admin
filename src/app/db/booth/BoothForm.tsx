@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { useConfirm } from "@/hooks/useConfirm";
 
 const CATEGORIES = [
   { value: "class", label: "クラス" },
@@ -39,12 +41,13 @@ interface BoothFormProps {
 export function BoothForm({ action, defaultValues = {}, isEdit = false }: BoothFormProps) {
   const [category, setCategory] = useState(defaultValues.category ?? "class");
   const [isPending, startTransition] = useTransition();
+  const { confirm, confirmState, handleResult } = useConfirm();
 
   const isEat = category === "eat";
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!confirm(isEdit ? "変更を保存しますか？" : "新規作成しますか？")) return;
+    const ok = await confirm(isEdit ? "変更を保存しますか？" : "新規作成しますか？"); if (!ok) return;
     const fd = new FormData(e.currentTarget);
     startTransition(async () => {
       await action(fd);
@@ -213,6 +216,7 @@ export function BoothForm({ action, defaultValues = {}, isEdit = false }: BoothF
           {isPending ? "保存中…" : isEdit ? "保存" : "作成"}
         </button>
       </div>
+      {confirmState && <ConfirmDialog message={confirmState.message} onConfirm={() => handleResult(true)} onCancel={() => handleResult(false)} />}
     </form>
   );
 }

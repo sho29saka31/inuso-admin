@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { isFullAccess, getScopeLabel } from "@/lib/admin-scope";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { useConfirm } from "@/hooks/useConfirm";
 
 const FULL_NAV = [
   { href: "/admin/mybooth", label: "マイブース" },
@@ -29,9 +31,10 @@ export function AdminShell({
 }) {
   const pathname = usePathname();
   const navItems = isFullAccess(scope) ? FULL_NAV : LIMITED_NAV;
+  const { confirm, confirmState, handleResult } = useConfirm();
 
   async function handleLogout() {
-    if (!confirm("ログアウトしますか？")) return;
+    const ok = await confirm("ログアウトしますか？"); if (!ok) return;
     await fetch("/api/admin/logout", { method: "POST" });
     window.location.href = "/admin/login";
   }
@@ -83,6 +86,7 @@ export function AdminShell({
       </nav>
 
       <main className="flex-1 p-4 max-w-3xl w-full mx-auto">{children}</main>
+      {confirmState && <ConfirmDialog message={confirmState.message} onConfirm={() => handleResult(true)} onCancel={() => handleResult(false)} />}
     </div>
   );
 }

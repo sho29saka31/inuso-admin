@@ -2,6 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { CalendarPicker } from "./CalendarPicker";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { useConfirm } from "@/hooks/useConfirm";
 
 interface EventFormProps {
   action: (formData: FormData) => Promise<void>;
@@ -20,10 +22,11 @@ interface EventFormProps {
 
 export function EventForm({ action, defaultValues = {}, isEdit = false }: EventFormProps) {
   const [isPending, startTransition] = useTransition();
+  const { confirm, confirmState, handleResult } = useConfirm();
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!confirm(isEdit ? "変更を保存しますか？" : "イベントを作成しますか？")) return;
+    const ok = await confirm(isEdit ? "変更を保存しますか？" : "イベントを作成しますか？"); if (!ok) return;
     const fd = new FormData(e.currentTarget);
     startTransition(async () => { await action(fd); });
   }
@@ -80,6 +83,7 @@ export function EventForm({ action, defaultValues = {}, isEdit = false }: EventF
           {isPending ? "保存中…" : isEdit ? "保存" : "作成"}
         </button>
       </div>
+      {confirmState && <ConfirmDialog message={confirmState.message} onConfirm={() => handleResult(true)} onCancel={() => handleResult(false)} />}
     </form>
   );
 }
