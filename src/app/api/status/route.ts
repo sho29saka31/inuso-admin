@@ -77,14 +77,14 @@ async function fetchSentryIssues(project: string, statsPeriod: string) {
   const token = process.env.SENTRY_API_TOKEN;
   if (!token) return { count: null, error: "SENTRY_API_TOKEN未設定" };
   const org = "isf-webapp";
-  const url = `https://sentry.io/api/0/projects/${org}/${project}/issues/?query=is%3Aunresolved&statsPeriod=${statsPeriod}&limit=100`;
+  const url = `https://sentry.io/api/0/organizations/${org}/issues/?query=is%3Aunresolved+project%3A${project}&statsPeriod=${statsPeriod}&limit=100`;
   try {
     const res = await fetch(url, {
       headers: { Authorization: `Bearer ${token}` },
       next: { revalidate: 0 },
     });
     const body = await res.text();
-    console.log(`[Sentry:${project}:${statsPeriod}] status=${res.status} token=${token.slice(0,8)} body=${body.slice(0, 150)}`);
+    console.log(`[Sentry:${project}:${statsPeriod}] status=${res.status} body=${body.slice(0, 150)}`);
     if (!res.ok) return { count: null, error: `HTTP ${res.status}: ${body.slice(0, 100)}` };
     const data = JSON.parse(body);
     return { count: Array.isArray(data) ? data.length : null, error: null };
