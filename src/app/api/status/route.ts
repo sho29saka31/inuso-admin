@@ -74,7 +74,7 @@ async function fetchLatestNotice() {
 }
 
 async function fetchSentryIssues(project: string, statsPeriod: string) {
-  const token = process.env.SENTRY_API_TOKEN;
+  const token = process.env.SENTRY_AUTH_TOKEN;
   if (!token) return null;
   const org = "shoki-6b";
   const url = `https://sentry.io/api/0/projects/${org}/${project}/issues/?query=is%3Aunresolved&statsPeriod=${statsPeriod}&limit=100`;
