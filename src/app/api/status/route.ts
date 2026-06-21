@@ -75,16 +75,19 @@ async function fetchLatestNotice() {
 
 async function fetchSentryIssues(project: string, statsPeriod: string) {
   const token = process.env.SENTRY_AUTH_TOKEN;
-  if (!token) return null;
-  const org = "shoki-6b";
+  if (!token) return { count: null, error: "SENTRY_AUTH_TOKEN未設定" };
+  const org = "isf-webapp";
   const url = `https://sentry.io/api/0/projects/${org}/${project}/issues/?query=is%3Aunresolved&statsPeriod=${statsPeriod}&limit=100`;
   const res = await fetch(url, {
     headers: { Authorization: `Bearer ${token}` },
     next: { revalidate: 0 },
   });
-  if (!res.ok) return null;
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    return { count: null, error: `HTTP ${res.status}: ${body.slice(0, 100)}` };
+  }
   const data = await res.json();
-  return Array.isArray(data) ? data.length : null;
+  return { count: Array.isArray(data) ? data.length : null, error: null };
 }
 
 export async function GET() {
@@ -105,10 +108,10 @@ export async function GET() {
   const boothResult = await Promise.allSettled([fetchBoothStatus(warnMinutes, alertMinutes)]);
 
   const [sentry1hViewer, sentry24hViewer, sentry1hAdmin, sentry24hAdmin] = await Promise.allSettled([
-    fetchSentryIssues("isf-viewer", "1h"),
-    fetchSentryIssues("isf-viewer", "24h"),
-    fetchSentryIssues("isf-admin", "1h"),
-    fetchSentryIssues("isf-admin", "24h"),
+    fetchSentryIssues("viewer", "1h"),
+    fetchSentryIssues("viewer", "24h"),
+    fetchSentryIssues("admin", "1h"),
+    fetchSentryIssues("admin", "24h"),
   ]);
 
   const booths =
@@ -146,12 +149,14 @@ export async function GET() {
     noticeError: noticeResult.status === "rejected" ? String((noticeResult as PromiseRejectedResult).reason) : null,
     sentry: {
       viewer: {
-        issues1h: sentry1hViewer.status === "fulfilled" ? sentry1hViewer.value : null,
-        issues24h: sentry24hViewer.status === "fulfilled" ? sentry24hViewer.value : null,
+        issues1h: sentry1hViewer.status === "fulfilled" ? sentry1hViewer.value.count : null,
+        issues24h: sentry24hViewer.status === "fulfilled" ? sentry24hViewer.value.count : null,
+        error: sentry1hViewer.status === "fulfilled" ? sentry1hViewer.value.error : String((sentry1hViewer as PromiseRejectedResult).reason),
       },
       admin: {
-        issues1h: sentry1hAdmin.status === "fulfilled" ? sentry1hAdmin.value : null,
-        issues24h: sentry24hAdmin.status === "fulfilled" ? sentry24hAdmin.value : null,
+        issues1h: sentry1hAdmin.status === "fulfilled" ? sentry1hAdmin.value.count : null,
+        issues24h: sentry24hAdmin.status === "fulfilled" ? sentry24hAdmin.value.count : null,
+        error: sentry1hAdmin.status === "fulfilled" ? sentry1hAdmin.value.error : String((sentry1hAdmin as PromiseRejectedResult).reason),
       },
     },
   });
