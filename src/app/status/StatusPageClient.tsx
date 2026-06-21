@@ -31,8 +31,8 @@ interface StatusData {
   notice: { title: string; createdAt: string; isUrgent: boolean } | null;
   noticeError: string | null;
   sentry: {
-    viewer: { issues1h: number | null; issues24h: number | null };
-    admin: { issues1h: number | null; issues24h: number | null };
+    viewer: { issues1h: number | null; issues24h: number | null; error: string | null };
+    admin: { issues1h: number | null; issues24h: number | null; error: string | null };
   };
 }
 
@@ -286,9 +286,14 @@ export default function StatusPageClient() {
             </tr>
           </tbody>
         </table>
-        {data.sentry.viewer.issues1h === null && (
-          <p className="text-xs text-gray-400 mt-2">
-            ※ SENTRY_API_TOKEN が未設定のため取得できません
+        {data.sentry.viewer.error && (
+          <p className="text-xs text-red-400 mt-2 font-mono break-all">
+            viewer エラー: {data.sentry.viewer.error}
+          </p>
+        )}
+        {data.sentry.admin.error && (
+          <p className="text-xs text-red-400 mt-2 font-mono break-all">
+            admin エラー: {data.sentry.admin.error}
           </p>
         )}
       </SectionCard>
