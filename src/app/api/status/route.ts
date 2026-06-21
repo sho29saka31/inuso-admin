@@ -74,7 +74,7 @@ async function fetchLatestNotice() {
 }
 
 async function fetchSentryIssues(project: string, statsPeriod: string) {
-  const token = process.env.SENTRY_AUTH_TOKEN;
+  const token = process.env.SENTRY_API_TOKEN;
   if (!token) return { count: null, error: "SENTRY_AUTH_TOKEN未設定" };
   const org = "isf-webapp";
   const url = `https://sentry.io/api/0/projects/${org}/${project}/issues/?query=is%3Aunresolved&statsPeriod=${statsPeriod}&limit=100`;
