@@ -78,18 +78,19 @@ async function fetchSentryIssues(project: string, statsPeriod: string) {
   if (!token) return { count: null, error: "SENTRY_API_TOKEN未設定" };
   const org = "isf-webapp";
   const url = `https://sentry.io/api/0/projects/${org}/${project}/issues/?query=is%3Aunresolved&statsPeriod=${statsPeriod}&limit=100`;
-  console.log(`[Sentry] token=${token ? "set("+token.slice(0,6)+"...)" : "unset"} url=${url}`);
-  const res = await fetch(url, {
-    headers: { Authorization: `Bearer ${token}` },
-    next: { revalidate: 0 },
-  });
-  if (!res.ok) {
-    const body = await res.text().catch(() => "");
-    console.log(`[Sentry] ${project} ${statsPeriod} -> ${res.status} ${body.slice(0, 200)}`);
-    return { count: null, error: `HTTP ${res.status}: ${body.slice(0, 100)}` };
+  try {
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${token}` },
+      next: { revalidate: 0 },
+    });
+    const body = await res.text();
+    console.log(`[Sentry:${project}:${statsPeriod}] status=${res.status} token=${token.slice(0,8)} body=${body.slice(0, 150)}`);
+    if (!res.ok) return { count: null, error: `HTTP ${res.status}: ${body.slice(0, 100)}` };
+    const data = JSON.parse(body);
+    return { count: Array.isArray(data) ? data.length : null, error: null };
+  } catch (e) {
+    return { count: null, error: `fetch error: ${String(e)}` };
   }
-  const data = await res.json();
-  return { count: Array.isArray(data) ? data.length : null, error: null };
 }
 
 export async function GET() {
