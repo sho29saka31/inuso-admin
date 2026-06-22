@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { useConfirm } from "@/hooks/useConfirm";
+import LoadingOverlay from "@/components/LoadingOverlay";
 
 interface Product {
   name: string;
@@ -54,6 +55,8 @@ export function EatForm({ action, defaultValues = {} }: EatFormProps) {
   }
 
   return (
+    <>
+    <LoadingOverlay visible={isPending} />
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <label className="flex flex-col gap-1">
         <span className="text-sm font-medium">公式インスタアドレス</span>
@@ -109,5 +112,6 @@ export function EatForm({ action, defaultValues = {} }: EatFormProps) {
       </div>
       {confirmState && <ConfirmDialog message={confirmState.message} onConfirm={() => handleResult(true)} onCancel={() => handleResult(false)} />}
     </form>
+    </>
   );
 }

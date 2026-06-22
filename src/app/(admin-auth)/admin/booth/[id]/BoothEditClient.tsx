@@ -26,7 +26,7 @@ export function BoothEditClient({ booth }: { booth: Record<string, unknown> }) {
     });
     setSaving(false);
     if (res.ok) {
-      router.push("/admin/booth");
+      router.push("/admin/mybooth");
       router.refresh();
     } else {
       const data = await res.json().catch(() => ({}));

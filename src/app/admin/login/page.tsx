@@ -51,13 +51,13 @@ const SCOPE_GROUPS = [
     items: [
       { value: "キッチンカー", label: "キッチンカー" },
       { value: "PTAバザー", label: "PTAバザー" },
+      { value: "保健委員会", label: "保健委員会" },
     ],
   },
 ];
 
 export default function AdminLoginPage() {
   const router = useRouter();
-  const [name, setName] = useState("");
   const [scope, setScope] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -66,18 +66,14 @@ export default function AdminLoginPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!name.trim()) {
-      setError("担当者名を入力してください");
-      return;
-    }
     if (!scope) {
-      setError("担当を選択してください");
+      setError("所属・担当を選択してください");
       return;
     }
     const res = await fetch("/api/admin/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ operatorId: name.trim(), scope, password }),
+      body: JSON.stringify({ scope, password }),
     });
     if (res.ok) {
       router.push("/admin/mybooth");
@@ -104,7 +100,7 @@ export default function AdminLoginPage() {
           >
             ISF 運営管理
           </h1>
-          <p className="text-sm text-text-sub mt-1">担当者名と所属を入力してください</p>
+          <p className="text-sm text-text-sub mt-1">所属・担当とパスワードを入力してください</p>
           {tapCount >= 3 && (
             <Link
               href="/db"
@@ -116,23 +112,12 @@ export default function AdminLoginPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <label className="flex flex-col gap-1">
-            <span className="text-sm font-medium">担当者名</span>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="例: 山田 太郎"
-              className="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-              autoFocus
-            />
-          </label>
-
           <div className="flex flex-col gap-1">
             <label className="text-sm font-medium">所属・担当</label>
             <select
               value={scope}
               onChange={(e) => setScope(e.target.value)}
+              autoFocus
               className="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             >
               <option value="" disabled>選択してください</option>

@@ -42,6 +42,7 @@ export async function createBooth(formData: FormData) {
         shopName,
         location: formData.get("location") as string,
         imageUrl: formData.get("imageUrl") as string,
+        scope: (formData.get("scope") as string) || null,
         products: [],
         instagramUrl: "",
       }
@@ -80,6 +81,7 @@ export async function updateBooth(boothId: string, formData: FormData) {
         shopName,
         location: formData.get("location") as string,
         imageUrl: formData.get("imageUrl") as string,
+        scope: (formData.get("scope") as string) || null,
         status: Number(formData.get("status") ?? 1),
         updatedAt: now,
       }
