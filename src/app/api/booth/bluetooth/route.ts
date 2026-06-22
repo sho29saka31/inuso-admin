@@ -51,9 +51,10 @@ export async function POST(req: NextRequest) {
     status,
     deviceCount: Number(deviceCount),
     updatedAt: now,
+    lastBluetoothAt: now,
   };
 
-  await db.collection("booths").doc(boothId).update(fields);
+  await db.collection("booths").doc(boothId).set(fields, { merge: true });
   await saveChangeLog({
     operatorId: operatorId ?? `bt-${boothId}`,
     targetCollection: "booths",
