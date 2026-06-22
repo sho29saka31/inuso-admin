@@ -1,5 +1,6 @@
 export const dynamic = "force-dynamic";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { getDb } from "@/lib/firebase-admin";
 import { getAdminScope } from "@/lib/admin-auth";
 import { isFullAccess, getScopeLabel } from "@/lib/admin-scope";
@@ -58,6 +59,14 @@ export default async function AdminMyBoothPage() {
   }
 
   const booths = await getBooths(scope);
+
+  // クラス・部活・委員会の限定アクセス担当者は編集ページに直接リダイレクト
+  if (!isFullAccess(scope) && booths && booths.length === 1) {
+    const b = booths[0];
+    if ((b.category as string) !== "eat") {
+      redirect(`/admin/booth/${b.boothId as string}`);
+    }
+  }
 
   return (
     <div className="flex flex-col gap-4">
