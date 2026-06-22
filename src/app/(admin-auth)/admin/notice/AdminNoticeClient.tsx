@@ -3,18 +3,7 @@
 import { useState } from "react";
 import { isFullAccess, getScopeLabel } from "@/lib/admin-scope";
 import LoadingOverlay from "@/components/LoadingOverlay";
-
-const ALL_TARGETS = [
-  { value: "all", label: "全ユーザー (all)" },
-  { value: "guest", label: "ゲストのみ (guest)" },
-  { value: "edu", label: "生徒全体 (edu)" },
-  { value: "prof", label: "先生全体 (prof)" },
-  { value: "1nen", label: "1年全体 (1nen)" },
-  { value: "2nen", label: "2年全体 (2nen)" },
-  { value: "3nen", label: "3年全体 (3nen)" },
-];
-
-const NON_TEACHER_TARGETS = ALL_TARGETS.filter((t) => t.value !== "prof");
+import { ALL_TARGETS, NON_TEACHER_TARGETS, TYPE_OPTIONS } from "@/lib/notice-constants";
 
 // 教員用発信元（先生・PTA含む全選択肢）
 const TEACHER_AUTHOR_OPTIONS = [
@@ -49,13 +38,6 @@ const EXEC_AUTHOR_OPTIONS = [
   { value: "__other__", label: "その他" },
 ];
 
-const TYPE_OPTIONS = [
-  { value: "urgent", label: "緊急" },
-  { value: "info", label: "お知らせ" },
-  { value: "warning", label: "注意" },
-  { value: "other", label: "その他" },
-];
-
 export default function AdminNoticeClient({ scope }: { scope: string }) {
   const scopeLocked = !isFullAccess(scope);
   const isTeacherScope = scope === "教員";
@@ -79,7 +61,7 @@ export default function AdminNoticeClient({ scope }: { scope: string }) {
   const isOther = authorSelect === "__other__";
 
   // 送信対象: 教員のみ先生を含む、クラス・部活・飲食等の限定アカウントはallのみ
-  const targets = (!isFullAccess(scope))
+  const targets = scopeLocked
     ? ALL_TARGETS.filter((t) => t.value === "all")
     : isTeacherScope
     ? ALL_TARGETS
@@ -202,7 +184,7 @@ export default function AdminNoticeClient({ scope }: { scope: string }) {
 
         <div className="flex flex-col gap-1">
           <label className="text-sm font-medium">送信対象</label>
-          {!isFullAccess(scope) ? (
+          {scopeLocked ? (
             <div className="border rounded-lg px-3 py-2 text-sm bg-gray-50 text-text-sub">
               全ユーザー (all)
               <span className="ml-2 text-xs text-text-sub">（固定）</span>

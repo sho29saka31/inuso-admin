@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getDb, nowTimestamp } from "@/lib/firebase-admin";
 import { saveChangeLog } from "@/lib/changelog";
 import { getOperatorId } from "@/lib/admin-auth";
+import { revalidateViewer } from "@/lib/revalidate";
 
 export async function POST(req: NextRequest) {
   const operatorId = await getOperatorId();
@@ -38,15 +39,7 @@ export async function POST(req: NextRequest) {
     changedFields: fields,
   });
 
-  const viewerUrl = process.env.VIEWER_REVALIDATE_URL;
-  const viewerSecret = process.env.VIEWER_REVALIDATE_SECRET;
-  if (viewerUrl && viewerSecret) {
-    await fetch(viewerUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ secret: viewerSecret, paths: ["/busy", "/booth"] }),
-    }).catch(() => {});
-  }
+  await revalidateViewer(["/busy", "/booth"]);
 
   return NextResponse.json({ ok: true });
 }
