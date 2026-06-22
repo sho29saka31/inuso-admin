@@ -38,9 +38,14 @@ export async function POST(req: NextRequest) {
 
   const db = getDb();
 
-  // 手動モードのブースはBluetoothによる自動更新をスキップ
+  // ブースの存在確認
   const boothDoc = await db.collection("booths").doc(boothId).get();
-  if (boothDoc.exists && boothDoc.data()?.isManual) {
+  if (!boothDoc.exists) {
+    return NextResponse.json({ error: "booth not found", boothId }, { status: 400 });
+  }
+
+  // 手動モードのブースはBluetoothによる自動更新をスキップ
+  if (boothDoc.data()?.isManual) {
     return NextResponse.json({ ok: true, skipped: true, reason: "manual mode" });
   }
 
@@ -54,7 +59,7 @@ export async function POST(req: NextRequest) {
     lastBluetoothAt: now,
   };
 
-  await db.collection("booths").doc(boothId).set(fields, { merge: true });
+  await db.collection("booths").doc(boothId).update(fields);
   await saveChangeLog({
     operatorId: operatorId ?? `bt-${boothId}`,
     targetCollection: "booths",
