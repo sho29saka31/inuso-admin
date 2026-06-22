@@ -48,8 +48,9 @@ export function BoothForm({ action, defaultValues = {}, isEdit = false }: BoothF
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    const form = e.currentTarget;
     const ok = await confirm(isEdit ? "変更を保存しますか？" : "新規作成しますか？"); if (!ok) return;
-    const fd = new FormData(e.currentTarget);
+    const fd = new FormData(form);
     startTransition(async () => {
       await action(fd);
     });
