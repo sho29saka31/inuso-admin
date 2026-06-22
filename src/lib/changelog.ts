@@ -1,4 +1,4 @@
-import { getDb, nowTimestamp } from "./firebase-admin";
+import { getRtdb, nowTimestamp } from "./firebase-admin";
 
 interface ChangeLogEntry {
   operatorId: string;
@@ -9,10 +9,10 @@ interface ChangeLogEntry {
 }
 
 export async function saveChangeLog(entry: ChangeLogEntry) {
-  const db = getDb();
+  const db = getRtdb();
   const now = nowTimestamp();
-  const logId = `log-${Date.now()}`;
-  await db.collection("changeLogs").doc(logId).set({
+  const logId = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+  await db.ref(`changeLogs/${entry.targetId}/${logId}`).set({
     logId,
     operatorId: entry.operatorId,
     targetCollection: entry.targetCollection,

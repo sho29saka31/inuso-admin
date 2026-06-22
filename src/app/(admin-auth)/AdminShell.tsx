@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect } from "react";
 import { isFullAccess, getScopeLabel } from "@/lib/admin-scope";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { useConfirm } from "@/hooks/useConfirm";
+import AdminFcmInit from "@/components/AdminFcmInit";
 
 const FULL_NAV = [
   { href: "/admin/mybooth", label: "マイブース" },
@@ -32,6 +34,13 @@ export function AdminShell({
   const pathname = usePathname();
   const navItems = isFullAccess(scope) ? FULL_NAV : LIMITED_NAV;
   const { confirm, confirmState, handleResult } = useConfirm();
+
+  useEffect(() => {
+    const check = () => fetch("/api/admin/check-failover", { method: "POST" }).catch(() => {});
+    check();
+    const id = setInterval(check, 2 * 60 * 1000);
+    return () => clearInterval(id);
+  }, []);
 
   async function handleLogout() {
     const ok = await confirm("ログアウトしますか？"); if (!ok) return;
@@ -87,6 +96,7 @@ export function AdminShell({
 
       <main className="flex-1 p-4 max-w-3xl w-full mx-auto">{children}</main>
       {confirmState && <ConfirmDialog message={confirmState.message} onConfirm={() => handleResult(true)} onCancel={() => handleResult(false)} />}
+      <AdminFcmInit />
     </div>
   );
 }

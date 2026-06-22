@@ -9,7 +9,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { boothId, status, waitCount, isManual, products } = await req.json();
+  const body = await req.json() as Record<string, unknown>;
+  const boothId = typeof body.boothId === "string" ? body.boothId : undefined;
+  const status = body.status;
+  const waitCount = body.waitCount;
+  const isManual = body.isManual;
+  const products = body.products;
   if (!boothId) {
     return NextResponse.json({ error: "boothId required" }, { status: 400 });
   }

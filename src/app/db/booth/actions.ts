@@ -50,6 +50,7 @@ export async function createBooth(formData: FormData) {
         location: formData.get("location") as string,
         description: formData.get("description") as string,
         boothImage: formData.get("boothImage") as string,
+        scope: (formData.get("scope") as string) || null,
       };
 
   const data = { ...base, ...extra };
@@ -87,6 +88,7 @@ export async function updateBooth(boothId: string, formData: FormData) {
         location: formData.get("location") as string,
         description: formData.get("description") as string,
         boothImage: formData.get("boothImage") as string,
+        scope: (formData.get("scope") as string) || null,
         status: Number(formData.get("status") ?? 1),
         updatedAt: now,
       };

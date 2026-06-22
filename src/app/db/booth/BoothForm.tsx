@@ -34,6 +34,7 @@ interface BoothFormProps {
     imageUrl?: string;
     status?: number;
     type?: string;
+    scope?: string;
   };
   isEdit?: boolean;
 }
@@ -188,6 +189,16 @@ export function BoothForm({ action, defaultValues = {}, isEdit = false }: BoothF
               type="url"
               className="border rounded-lg px-3 py-2 text-sm"
               placeholder="https://..."
+            />
+          </label>
+
+          <label className="flex flex-col gap-1">
+            <span className="text-sm font-medium">スコープ</span>
+            <input
+              name="scope"
+              defaultValue={defaultValues.scope ?? ""}
+              className="border rounded-lg px-3 py-2 text-sm"
+              placeholder="例: 1-1（ADMIN_PASSWORDSのキーと合わせる）"
             />
           </label>
 
