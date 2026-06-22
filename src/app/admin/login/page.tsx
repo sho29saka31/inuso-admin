@@ -51,6 +51,7 @@ const SCOPE_GROUPS = [
     items: [
       { value: "キッチンカー", label: "キッチンカー" },
       { value: "PTAバザー", label: "PTAバザー" },
+      { value: "保健委員会", label: "保健委員会" },
     ],
   },
 ];
