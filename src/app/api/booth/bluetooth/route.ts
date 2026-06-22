@@ -29,8 +29,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const body = await req.json();
-  const { boothId, deviceCount, macAddresses, operatorId } = body;
+  const body = await req.json() as Record<string, unknown>;
+  const boothId = typeof body.boothId === "string" ? body.boothId : undefined;
+  const deviceCount = typeof body.deviceCount === "number" ? body.deviceCount : undefined;
+  const operatorId = typeof body.operatorId === "string" ? body.operatorId : undefined;
 
   if (!boothId || deviceCount === undefined) {
     return NextResponse.json({ error: "boothId and deviceCount required" }, { status: 400 });

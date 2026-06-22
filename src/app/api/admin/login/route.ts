@@ -1,14 +1,38 @@
 import { NextRequest, NextResponse } from "next/server";
 import { setOperatorId, setAdminScope } from "@/lib/admin-auth";
 
+function getPasswords(): Record<string, string> {
+  const raw = process.env.ADMIN_PASSWORDS;
+  if (!raw) return {};
+  try {
+    return JSON.parse(raw) as Record<string, string>;
+  } catch {
+    return {};
+  }
+}
+
 export async function POST(req: NextRequest) {
-  const { operatorId, scope } = await req.json();
-  if (!operatorId || !operatorId.trim()) {
+  const body = await req.json() as Record<string, unknown>;
+  const operatorId = typeof body.operatorId === "string" ? body.operatorId.trim() : "";
+  const scope = typeof body.scope === "string" ? body.scope.trim() : "";
+  const password = typeof body.password === "string" ? body.password : "";
+
+  if (!operatorId) {
     return NextResponse.json({ error: "operatorId required" }, { status: 400 });
   }
-  await setOperatorId(operatorId.trim());
-  if (scope && scope.trim()) {
-    await setAdminScope(scope.trim());
+  if (!scope) {
+    return NextResponse.json({ error: "scope required" }, { status: 400 });
   }
+
+  const passwords = getPasswords();
+  if (Object.keys(passwords).length > 0) {
+    const expected = passwords[scope];
+    if (!expected || expected !== password) {
+      return NextResponse.json({ error: "パスワードが違います" }, { status: 401 });
+    }
+  }
+
+  await setOperatorId(operatorId);
+  await setAdminScope(scope);
   return NextResponse.json({ ok: true });
 }

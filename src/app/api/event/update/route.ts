@@ -9,7 +9,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { eventId, startTime, endTime, location, isDelayed, delayMinutes } = await req.json();
+  const body = await req.json() as Record<string, unknown>;
+  const eventId = typeof body.eventId === "string" ? body.eventId : undefined;
+  const startTime = body.startTime;
+  const endTime = body.endTime;
+  const location = body.location;
+  const isDelayed = body.isDelayed;
+  const delayMinutes = body.delayMinutes;
   if (!eventId) {
     return NextResponse.json({ error: "eventId required" }, { status: 400 });
   }

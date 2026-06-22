@@ -11,7 +11,7 @@ interface ChangeLogEntry {
 export async function saveChangeLog(entry: ChangeLogEntry) {
   const db = getDb();
   const now = nowTimestamp();
-  const logId = `log-${Date.now()}`;
+  const logId = `log-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
   await db.collection("changeLogs").doc(logId).set({
     logId,
     operatorId: entry.operatorId,

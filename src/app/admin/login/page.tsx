@@ -59,6 +59,7 @@ export default function AdminLoginPage() {
   const router = useRouter();
   const [name, setName] = useState("");
   const [scope, setScope] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [tapCount, setTapCount] = useState(0);
   const tapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -76,12 +77,13 @@ export default function AdminLoginPage() {
     const res = await fetch("/api/admin/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ operatorId: name.trim(), scope }),
+      body: JSON.stringify({ operatorId: name.trim(), scope, password }),
     });
     if (res.ok) {
       router.push("/admin/mybooth");
     } else {
-      setError("ログインに失敗しました");
+      const json = await res.json().catch(() => ({})) as { error?: string };
+      setError(json.error ?? "ログインに失敗しました");
     }
   }
 
@@ -145,6 +147,17 @@ export default function AdminLoginPage() {
               ))}
             </select>
           </div>
+
+          <label className="flex flex-col gap-1">
+            <span className="text-sm font-medium">パスワード</span>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="担当パスワードを入力"
+              className="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </label>
 
           {error && <p className="text-xs text-danger">{error}</p>}
 
