@@ -1,6 +1,6 @@
 import { getApps, initializeApp, cert, getApp } from "firebase-admin/app";
 import { getMessaging } from "firebase-admin/messaging";
-import { getRtdb } from "./firebase-admin";
+import { getDb } from "./firebase-admin";
 
 function getAdminApp() {
   if (getApps().length > 0) return getApp();
@@ -10,9 +10,11 @@ function getAdminApp() {
 }
 
 export async function sendAdminNotification(scope: string, title: string, body: string) {
-  const db = getRtdb();
-  const snapshot = await db.ref(`adminFcmTokens/${scope}/token`).get();
-  const token = snapshot.val() as string | null;
+  const db = getDb();
+  const tokenDoc = await db.collection("adminFcmTokens").doc(scope).get();
+  if (!tokenDoc.exists) return { sent: false, reason: "no token" };
+
+  const token = tokenDoc.data()?.token as string | undefined;
   if (!token) return { sent: false, reason: "no token" };
 
   try {

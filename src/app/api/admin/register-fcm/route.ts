@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getRtdb, nowTimestamp } from "@/lib/firebase-admin";
+import { getDb, nowTimestamp } from "@/lib/firebase-admin";
 import { getAdminScope } from "@/lib/admin-auth";
 
 export async function POST(req: NextRequest) {
@@ -14,8 +14,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "token required" }, { status: 400 });
   }
 
-  const db = getRtdb();
-  await db.ref(`adminFcmTokens/${scope}`).set({
+  const db = getDb();
+  await db.collection("adminFcmTokens").doc(scope).set({
     scope,
     token,
     updatedAt: nowTimestamp(),
