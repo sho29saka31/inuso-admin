@@ -132,7 +132,7 @@ export default function AdminNoticeClient({ scope }: { scope: string }) {
 
   return (
     <>
-    <LoadingOverlay visible={saving} />
+    <LoadingOverlay visible={saving} label="送信中..." />
     <div className="flex flex-col gap-6">
       <h1 className="text-xl font-bold">通知送信</h1>
 
