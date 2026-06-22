@@ -45,6 +45,7 @@ export default async function BoothEditPage({
           imageUrl: booth.imageUrl as string,
           status: booth.status as number,
           type: booth.type as string,
+          scope: booth.scope as string,
         }}
       />
     </div>
