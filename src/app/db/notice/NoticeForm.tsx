@@ -91,13 +91,14 @@ export function NoticeForm({ action, defaultValues = {}, isEdit = false }: Notic
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    const form = e.currentTarget;
     if (isUrgent) {
       const ok1 = await confirm("【緊急通知】内容を確認しましたか？"); if (!ok1) return;
       const ok2 = await confirm("本当に送信しますか？この操作は取り消せません。"); if (!ok2) return;
     } else {
       const ok = await confirm(isEdit ? "変更を保存しますか？" : "作成しますか？"); if (!ok) return;
     }
-    const fd = new FormData(e.currentTarget);
+    const fd = new FormData(form);
     fd.set("type", noticeType);
     fd.set("authorId", resolvedAuthorId());
     startTransition(async () => { await action(fd); });
