@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { CalendarPicker } from "./CalendarPicker";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
+import LoadingOverlay from "@/components/LoadingOverlay";
 import { useConfirm } from "@/hooks/useConfirm";
 
 interface EventFormProps {
@@ -33,6 +34,8 @@ export function EventForm({ action, defaultValues = {}, isEdit = false }: EventF
   }
 
   return (
+    <>
+    <LoadingOverlay visible={isPending} />
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <label className="flex flex-col gap-1">
         <span className="text-sm font-medium">イベント名 <span className="text-danger">*</span></span>
@@ -86,5 +89,6 @@ export function EventForm({ action, defaultValues = {}, isEdit = false }: EventF
       </div>
       {confirmState && <ConfirmDialog message={confirmState.message} onConfirm={() => handleResult(true)} onCancel={() => handleResult(false)} />}
     </form>
+    </>
   );
 }

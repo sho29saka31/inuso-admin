@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { useConfirm } from "@/hooks/useConfirm";
+import LoadingOverlay from "@/components/LoadingOverlay";
 
 const CATEGORIES = [
   { value: "class", label: "クラス" },
@@ -57,6 +58,8 @@ export function BoothForm({ action, defaultValues = {}, isEdit = false }: BoothF
   }
 
   return (
+    <>
+    <LoadingOverlay visible={isPending} />
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       {!isEdit && !isEat && (
         <div className="bg-blue-50 border border-blue-200 rounded p-3 text-xs text-blue-800">
@@ -135,6 +138,16 @@ export function BoothForm({ action, defaultValues = {}, isEdit = false }: BoothF
               type="url"
               className="border rounded-lg px-3 py-2 text-sm"
               placeholder="https://..."
+            />
+          </label>
+
+          <label className="flex flex-col gap-1">
+            <span className="text-sm font-medium">スコープ</span>
+            <input
+              name="scope"
+              defaultValue={defaultValues.scope ?? ""}
+              className="border rounded-lg px-3 py-2 text-sm"
+              placeholder="例: 飲食（ADMIN_PASSWORDSのキーと合わせる）"
             />
           </label>
 
@@ -230,5 +243,6 @@ export function BoothForm({ action, defaultValues = {}, isEdit = false }: BoothF
       </div>
       {confirmState && <ConfirmDialog message={confirmState.message} onConfirm={() => handleResult(true)} onCancel={() => handleResult(false)} />}
     </form>
+    </>
   );
 }
