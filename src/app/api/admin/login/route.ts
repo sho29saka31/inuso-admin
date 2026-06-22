@@ -13,13 +13,9 @@ function getPasswords(): Record<string, string> {
 
 export async function POST(req: NextRequest) {
   const body = await req.json() as Record<string, unknown>;
-  const operatorId = typeof body.operatorId === "string" ? body.operatorId.trim() : "";
   const scope = typeof body.scope === "string" ? body.scope.trim() : "";
   const password = typeof body.password === "string" ? body.password : "";
 
-  if (!operatorId) {
-    return NextResponse.json({ error: "operatorId required" }, { status: 400 });
-  }
   if (!scope) {
     return NextResponse.json({ error: "scope required" }, { status: 400 });
   }
@@ -32,7 +28,7 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  await setOperatorId(operatorId);
+  await setOperatorId(scope);
   await setAdminScope(scope);
   return NextResponse.json({ ok: true });
 }
