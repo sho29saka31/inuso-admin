@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { useConfirm } from "@/hooks/useConfirm";
+import LoadingOverlay from "@/components/LoadingOverlay";
 
 const ALL_TARGETS = [
   { value: "all", label: "全ユーザー (all)" },
@@ -105,6 +106,8 @@ export function NoticeForm({ action, defaultValues = {}, isEdit = false }: Notic
   }
 
   return (
+    <>
+    <LoadingOverlay visible={isPending} />
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <div className="flex flex-col gap-1">
         <span className="text-sm font-medium">発信元</span>
@@ -184,5 +187,6 @@ export function NoticeForm({ action, defaultValues = {}, isEdit = false }: Notic
       </div>
       {confirmState && <ConfirmDialog message={confirmState.message} onConfirm={() => handleResult(true)} onCancel={() => handleResult(false)} />}
     </form>
+    </>
   );
 }
