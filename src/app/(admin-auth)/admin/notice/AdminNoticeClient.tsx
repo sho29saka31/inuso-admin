@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { isFullAccess, isClassScope, getScopeLabel } from "@/lib/admin-scope";
+import { isFullAccess, getScopeLabel } from "@/lib/admin-scope";
 import LoadingOverlay from "@/components/LoadingOverlay";
 
 const ALL_TARGETS = [
@@ -78,8 +78,12 @@ export default function AdminNoticeClient({ scope }: { scope: string }) {
   const isTeacher = authorSelect === "__teacher__";
   const isOther = authorSelect === "__other__";
 
-  // 送信対象: 教員のみ先生を含む
-  const targets = isTeacherScope ? ALL_TARGETS : NON_TEACHER_TARGETS;
+  // 送信対象: 教員のみ先生を含む、クラス・部活・飲食等の限定アカウントはallのみ
+  const targets = (!isFullAccess(scope))
+    ? ALL_TARGETS.filter((t) => t.value === "all")
+    : isTeacherScope
+    ? ALL_TARGETS
+    : NON_TEACHER_TARGETS;
 
   // 発信元選択肢
   const authorOptions = isTeacherScope ? TEACHER_AUTHOR_OPTIONS : EXEC_AUTHOR_OPTIONS;
@@ -198,15 +202,22 @@ export default function AdminNoticeClient({ scope }: { scope: string }) {
 
         <div className="flex flex-col gap-1">
           <label className="text-sm font-medium">送信対象</label>
-          <select
-            value={target}
-            onChange={(e) => setTarget(e.target.value)}
-            className="border rounded-lg px-3 py-2 text-sm"
-          >
-            {targets.map((t) => (
-              <option key={t.value} value={t.value}>{t.label}</option>
-            ))}
-          </select>
+          {!isFullAccess(scope) ? (
+            <div className="border rounded-lg px-3 py-2 text-sm bg-gray-50 text-text-sub">
+              全ユーザー (all)
+              <span className="ml-2 text-xs text-text-sub">（固定）</span>
+            </div>
+          ) : (
+            <select
+              value={target}
+              onChange={(e) => setTarget(e.target.value)}
+              className="border rounded-lg px-3 py-2 text-sm"
+            >
+              {targets.map((t) => (
+                <option key={t.value} value={t.value}>{t.label}</option>
+              ))}
+            </select>
+          )}
         </div>
 
         <div className="flex flex-col gap-1">
