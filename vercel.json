@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/bluetooth-failover",
+      "schedule": "*/2 * * * *"
+    }
+  ]
+}
