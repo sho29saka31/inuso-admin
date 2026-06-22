@@ -3,6 +3,7 @@ import { getDb, nowTimestamp } from "@/lib/firebase-admin";
 import { saveChangeLog } from "@/lib/changelog";
 import { getOperatorId } from "@/lib/admin-auth";
 import { getMessaging } from "firebase-admin/messaging";
+import { revalidateViewer } from "@/lib/revalidate";
 
 export async function POST(req: NextRequest) {
   const operatorId = await getOperatorId();
@@ -49,15 +50,7 @@ export async function POST(req: NextRequest) {
     console.error("FCM send error:", err);
   }
 
-  const viewerUrl = process.env.VIEWER_REVALIDATE_URL;
-  const viewerSecret = process.env.VIEWER_REVALIDATE_SECRET;
-  if (viewerUrl && viewerSecret) {
-    await fetch(viewerUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ secret: viewerSecret, paths: ["/notice", "/top"] }),
-    }).catch(() => {});
-  }
+  await revalidateViewer(["/notice", "/top"]);
 
   return NextResponse.json({ ok: true, noticeId });
 }

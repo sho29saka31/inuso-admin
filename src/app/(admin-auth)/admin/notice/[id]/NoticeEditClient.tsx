@@ -4,24 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { isFullAccess, getScopeLabel } from "@/lib/admin-scope";
 import LoadingOverlay from "@/components/LoadingOverlay";
-
-const ALL_TARGETS = [
-  { value: "all", label: "全ユーザー (all)" },
-  { value: "guest", label: "ゲストのみ (guest)" },
-  { value: "edu", label: "生徒全体 (edu)" },
-  { value: "prof", label: "先生全体 (prof)" },
-  { value: "1nen", label: "1年全体 (1nen)" },
-  { value: "2nen", label: "2年全体 (2nen)" },
-  { value: "3nen", label: "3年全体 (3nen)" },
-];
-const NON_TEACHER_TARGETS = ALL_TARGETS.filter((t) => t.value !== "prof");
-
-const TYPE_OPTIONS = [
-  { value: "urgent", label: "緊急" },
-  { value: "info", label: "お知らせ" },
-  { value: "warning", label: "注意" },
-  { value: "other", label: "その他" },
-];
+import { ALL_TARGETS, NON_TEACHER_TARGETS, TYPE_OPTIONS } from "@/lib/notice-constants";
 
 export default function NoticeEditClient({
   notice,

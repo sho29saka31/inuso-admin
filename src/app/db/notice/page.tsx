@@ -61,7 +61,7 @@ export default async function NoticeListPage() {
                   <Link href={`/db/notice/${n.noticeId}`} className="text-xs px-3 py-1.5 rounded border border-primary text-primary">
                     編集
                   </Link>
-                  <DeleteButton noticeId={n.noticeId} title={n.title} action={deleteNotice} />
+                  <DeleteButton id={n.noticeId} label="削除" confirmMessage={`「${n.title}」を削除しますか？`} action={deleteNotice} />
                 </div>
               </div>
             );
