@@ -58,7 +58,7 @@ export default async function BoothListPage() {
                 >
                   編集
                 </Link>
-                <DeleteButton boothId={b.boothId} name={b.name ?? b.shopName} action={deleteBooth} />
+                <DeleteButton id={b.boothId} label="削除" confirmMessage={`「${b.name ?? b.shopName}」を削除しますか？この操作は取り消せません。`} action={deleteBooth} />
               </div>
             </div>
           ))}

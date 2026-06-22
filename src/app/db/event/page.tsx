@@ -77,7 +77,7 @@ export default async function EventListPage() {
                         <Link href={`/db/event/${ev.eventId}`} className="text-xs px-2 py-1 rounded border border-primary text-primary font-medium">
                           編集
                         </Link>
-                        <DeleteButton eventId={ev.eventId} name={ev.eventName} action={deleteEvent} />
+                        <DeleteButton id={ev.eventId} label="削除" confirmMessage={`「${ev.eventName}」を削除しますか？`} action={deleteEvent} />
                       </div>
                     </div>
                   ))}
@@ -109,7 +109,7 @@ export default async function EventListPage() {
                           <Link href={`/db/event/${ev.eventId}`} className="text-xs px-2 py-1 rounded border border-primary text-primary font-medium">
                             編集
                           </Link>
-                          <DeleteButton eventId={ev.eventId} name={ev.eventName} action={deleteEvent} />
+                          <DeleteButton id={ev.eventId} label="削除" confirmMessage={`「${ev.eventName}」を削除しますか？`} action={deleteEvent} />
                         </div>
                       </div>
                     ))}
