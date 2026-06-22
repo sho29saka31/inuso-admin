@@ -42,9 +42,10 @@ export function EatForm({ action, defaultValues = {} }: EatFormProps) {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    const form = e.currentTarget;
     const ok = await confirm("変更を保存しますか？"); if (!ok) return;
 
-    const fd = new FormData(e.currentTarget);
+    const fd = new FormData(form);
     products.forEach((p, i) => {
       fd.set(`product_name_${i}`, p.name);
       fd.set(`product_price_${i}`, String(p.price));
