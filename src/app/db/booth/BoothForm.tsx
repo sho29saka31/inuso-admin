@@ -139,6 +139,16 @@ export function BoothForm({ action, defaultValues = {}, isEdit = false }: BoothF
           </label>
 
           <label className="flex flex-col gap-1">
+            <span className="text-sm font-medium">スコープ</span>
+            <input
+              name="scope"
+              defaultValue={defaultValues.scope ?? ""}
+              className="border rounded-lg px-3 py-2 text-sm"
+              placeholder="例: 飲食（ADMIN_PASSWORDSのキーと合わせる）"
+            />
+          </label>
+
+          <label className="flex flex-col gap-1">
             <span className="text-sm font-medium">状態</span>
             <select name="status" defaultValue={defaultValues.status ?? 1} className="border rounded-lg px-3 py-2 text-sm">
               {STATUS_OPTIONS.map((o) => (
