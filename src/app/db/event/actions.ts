@@ -3,8 +3,14 @@
 import { redirect } from "next/navigation";
 import { getDb, nowTimestamp } from "@/lib/firebase-admin";
 import { saveChangeLog } from "@/lib/changelog";
+import { verifySession } from "@/lib/auth";
+
+async function requireSession() {
+  if (!await verifySession()) throw new Error("Unauthorized");
+}
 
 export async function createEvent(formData: FormData) {
+  await requireSession();
   const db = getDb();
   const now = nowTimestamp();
   const eventId = `event-${Date.now()}`;
@@ -34,6 +40,7 @@ export async function createEvent(formData: FormData) {
 }
 
 export async function updateEvent(eventId: string, formData: FormData) {
+  await requireSession();
   const db = getDb();
   const now = nowTimestamp();
   const fields = {
@@ -61,6 +68,7 @@ export async function updateEvent(eventId: string, formData: FormData) {
 }
 
 export async function deleteEvent(eventId: string) {
+  await requireSession();
   const db = getDb();
   await db.collection("events").doc(eventId).delete();
   await saveChangeLog({

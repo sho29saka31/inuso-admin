@@ -3,6 +3,11 @@
 import { redirect } from "next/navigation";
 import { getDb, nowTimestamp } from "@/lib/firebase-admin";
 import { saveChangeLog } from "@/lib/changelog";
+import { verifySession } from "@/lib/auth";
+
+async function requireSession() {
+  if (!await verifySession()) throw new Error("Unauthorized");
+}
 
 export interface BoothData {
   boothId: string;
@@ -17,6 +22,7 @@ export interface BoothData {
 }
 
 export async function createBooth(formData: FormData) {
+  await requireSession();
   const db = getDb();
   const now = nowTimestamp();
   const category = formData.get("category") as string;
@@ -70,6 +76,7 @@ export async function createBooth(formData: FormData) {
 }
 
 export async function updateBooth(boothId: string, formData: FormData) {
+  await requireSession();
   const db = getDb();
   const now = nowTimestamp();
   const category = formData.get("category") as string;
@@ -109,6 +116,7 @@ export async function updateBooth(boothId: string, formData: FormData) {
 }
 
 export async function deleteBooth(boothId: string) {
+  await requireSession();
   const db = getDb();
   await db.collection("booths").doc(boothId).delete();
   await saveChangeLog({

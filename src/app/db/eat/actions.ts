@@ -2,6 +2,7 @@
 
 import { getDb, nowTimestamp } from "@/lib/firebase-admin";
 import { saveChangeLog } from "@/lib/changelog";
+import { verifySession } from "@/lib/auth";
 
 function parseProducts(formData: FormData) {
   const products: { name: string; price: number }[] = [];
@@ -16,6 +17,7 @@ function parseProducts(formData: FormData) {
 }
 
 export async function updateEatItem(boothId: string, formData: FormData) {
+  if (!await verifySession()) throw new Error("Unauthorized");
   const db = getDb();
   const now = nowTimestamp();
   const fields = {
