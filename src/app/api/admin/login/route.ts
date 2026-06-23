@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { setOperatorId, setAdminScope } from "@/lib/admin-auth";
+import { setOperatorSession } from "@/lib/admin-auth";
 import { safeCompare } from "@/lib/safe-compare";
 
 function getPasswords(): Record<string, string> {
@@ -30,7 +30,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "パスワードが違います" }, { status: 401 });
   }
 
-  await setOperatorId(scope);
-  await setAdminScope(scope);
+  await setOperatorSession(scope, scope);
   return NextResponse.json({ ok: true });
 }
