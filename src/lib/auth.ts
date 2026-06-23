@@ -2,10 +2,11 @@
 
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
+import { safeCompare } from "./safe-compare";
 
-const SECRET = new TextEncoder().encode(
-  process.env.SESSION_SECRET ?? "fallback-secret-change-in-production"
-);
+const rawSecret = process.env.SESSION_SECRET;
+if (!rawSecret) throw new Error("SESSION_SECRET is not set");
+const SECRET = new TextEncoder().encode(rawSecret);
 const COOKIE = "db_session";
 const EXPIRES = 60 * 60 * 8; // 8 hours
 
@@ -43,8 +44,17 @@ export async function deleteSession() {
 }
 
 export async function checkCredential(stage: "id" | "pw" | "pin", value: string): Promise<boolean> {
-  if (stage === "id") return value === (process.env.DB_ADMIN_ID ?? "");
-  if (stage === "pw") return value === (process.env.DB_ADMIN_PW ?? "");
-  if (stage === "pin") return value === (process.env.DB_ADMIN_PIN ?? "");
+  if (stage === "id") {
+    const expected = process.env.DB_ADMIN_ID;
+    return !!expected && safeCompare(value, expected);
+  }
+  if (stage === "pw") {
+    const expected = process.env.DB_ADMIN_PW;
+    return !!expected && safeCompare(value, expected);
+  }
+  if (stage === "pin") {
+    const expected = process.env.DB_ADMIN_PIN;
+    return !!expected && safeCompare(value, expected);
+  }
   return false;
 }

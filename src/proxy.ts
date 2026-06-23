@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
-const SECRET = new TextEncoder().encode(
-  process.env.SESSION_SECRET ?? "fallback-secret-change-in-production"
-);
+const rawSecret = process.env.SESSION_SECRET;
+if (!rawSecret) throw new Error("SESSION_SECRET is not set");
+const SECRET = new TextEncoder().encode(rawSecret);
 
 const PROTECTED = /^\/db\/(booth|event|eat|notice|digital|config)/;
 
