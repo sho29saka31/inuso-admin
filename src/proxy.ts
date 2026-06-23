@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
-const rawSecret = process.env.SESSION_SECRET;
-if (!rawSecret) throw new Error("SESSION_SECRET is not set");
-const SECRET = new TextEncoder().encode(rawSecret);
+function getSecret(): Uint8Array {
+  const rawSecret = process.env.SESSION_SECRET;
+  if (!rawSecret) throw new Error("SESSION_SECRET is not set");
+  return new TextEncoder().encode(rawSecret);
+}
 
 const PROTECTED = /^\/db\/(booth|event|eat|notice|digital|config)/;
 
@@ -18,7 +20,7 @@ export async function proxy(request: NextRequest) {
   }
 
   try {
-    await jwtVerify(token, SECRET);
+    await jwtVerify(token, getSecret());
     return NextResponse.next();
   } catch {
     return NextResponse.redirect(new URL("/db", request.url));
