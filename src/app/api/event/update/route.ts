@@ -1,13 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb, nowTimestamp } from "@/lib/firebase-admin";
 import { saveChangeLog } from "@/lib/changelog";
-import { getOperatorId } from "@/lib/admin-auth";
+import { getOperatorId, getAdminScope } from "@/lib/admin-auth";
+import { isFullAccess } from "@/lib/admin-scope";
 import { revalidateViewer } from "@/lib/revalidate";
 
 export async function POST(req: NextRequest) {
   const operatorId = await getOperatorId();
   if (!operatorId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const scope = (await getAdminScope()) ?? operatorId;
+  if (!isFullAccess(scope)) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   const body = await req.json() as Record<string, unknown>;

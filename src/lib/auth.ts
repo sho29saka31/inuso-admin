@@ -2,10 +2,13 @@
 
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
+import { safeCompare } from "./safe-compare";
 
-const SECRET = new TextEncoder().encode(
-  process.env.SESSION_SECRET ?? "fallback-secret-change-in-production"
-);
+function getSecret(): Uint8Array {
+  const rawSecret = process.env.SESSION_SECRET;
+  if (!rawSecret) throw new Error("SESSION_SECRET is not set");
+  return new TextEncoder().encode(rawSecret);
+}
 const COOKIE = "db_session";
 const EXPIRES = 60 * 60 * 8; // 8 hours
 
@@ -13,7 +16,7 @@ export async function createSession() {
   const token = await new SignJWT({ auth: true })
     .setProtectedHeader({ alg: "HS256" })
     .setExpirationTime(`${EXPIRES}s`)
-    .sign(SECRET);
+    .sign(getSecret());
 
   const cookieStore = await cookies();
   cookieStore.set(COOKIE, token, {
@@ -30,7 +33,7 @@ export async function verifySession(): Promise<boolean> {
     const cookieStore = await cookies();
     const token = cookieStore.get(COOKIE)?.value;
     if (!token) return false;
-    await jwtVerify(token, SECRET);
+    await jwtVerify(token, getSecret());
     return true;
   } catch {
     return false;
@@ -43,8 +46,17 @@ export async function deleteSession() {
 }
 
 export async function checkCredential(stage: "id" | "pw" | "pin", value: string): Promise<boolean> {
-  if (stage === "id") return value === (process.env.DB_ADMIN_ID ?? "");
-  if (stage === "pw") return value === (process.env.DB_ADMIN_PW ?? "");
-  if (stage === "pin") return value === (process.env.DB_ADMIN_PIN ?? "");
+  if (stage === "id") {
+    const expected = process.env.DB_ADMIN_ID;
+    return !!expected && safeCompare(value, expected);
+  }
+  if (stage === "pw") {
+    const expected = process.env.DB_ADMIN_PW;
+    return !!expected && safeCompare(value, expected);
+  }
+  if (stage === "pin") {
+    const expected = process.env.DB_ADMIN_PIN;
+    return !!expected && safeCompare(value, expected);
+  }
   return false;
 }

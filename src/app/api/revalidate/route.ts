@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { safeCompare } from "@/lib/safe-compare";
 
 export async function POST(req: NextRequest) {
   const { secret, paths } = await req.json();
-  if (secret !== process.env.REVALIDATE_SECRET) {
+  const envSecret = process.env.REVALIDATE_SECRET;
+  if (!envSecret || !secret || !safeCompare(secret, envSecret)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

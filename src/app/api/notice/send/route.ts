@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb, nowTimestamp } from "@/lib/firebase-admin";
 import { saveChangeLog } from "@/lib/changelog";
-import { getOperatorId } from "@/lib/admin-auth";
+import { getOperatorId, getAdminScope } from "@/lib/admin-auth";
+import { isFullAccess, getScopeAuthorId } from "@/lib/admin-scope";
 import { getMessaging } from "firebase-admin/messaging";
 import { revalidateViewer } from "@/lib/revalidate";
 
@@ -11,10 +12,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const scope = (await getAdminScope()) ?? operatorId;
   const { authorId, title, body, target, type } = await req.json();
-  if (!authorId || !title || !body) {
-    return NextResponse.json({ error: "authorId, title, body required" }, { status: 400 });
+  if (!title || !body) {
+    return NextResponse.json({ error: "title, body required" }, { status: 400 });
   }
+
+  const resolvedTarget = isFullAccess(scope) ? (target ?? "all") : "all";
+  const resolvedAuthorId = isFullAccess(scope) ? (authorId ?? operatorId) : getScopeAuthorId(scope);
 
   const db = getDb();
   const now = nowTimestamp();
@@ -22,10 +27,10 @@ export async function POST(req: NextRequest) {
 
   const data = {
     noticeId,
-    authorId,
+    authorId: resolvedAuthorId,
     title,
     body,
-    target: target ?? "all",
+    target: resolvedTarget,
     type: type ?? "info",
     createdAt: now,
   };
@@ -42,7 +47,7 @@ export async function POST(req: NextRequest) {
   try {
     const messaging = getMessaging();
     await messaging.send({
-      topic: target ?? "all",
+      topic: resolvedTarget,
       data: { noticeId, type: type ?? "info", title, body },
       webpush: { headers: { Urgency: "high" } },
     });
