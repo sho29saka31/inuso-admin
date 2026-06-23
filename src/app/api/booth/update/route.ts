@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb, nowTimestamp } from "@/lib/firebase-admin";
 import { saveChangeLog } from "@/lib/changelog";
-import { getOperatorId } from "@/lib/admin-auth";
+import { getOperatorId, getAdminScope } from "@/lib/admin-auth";
+import { isFullAccess } from "@/lib/admin-scope";
 import { revalidateViewer } from "@/lib/revalidate";
 
 export async function POST(req: NextRequest) {
@@ -20,7 +21,18 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "boothId required" }, { status: 400 });
   }
 
+  const scope = (await getAdminScope()) ?? operatorId;
   const db = getDb();
+
+  if (!isFullAccess(scope)) {
+    const boothDoc = await db.collection("booths").doc(boothId).get();
+    if (!boothDoc.exists) {
+      return NextResponse.json({ error: "booth not found" }, { status: 404 });
+    }
+    if ((boothDoc.data()?.scope ?? "") !== scope) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+  }
   const now = nowTimestamp();
   const fields: Record<string, unknown> = {
     status: Number(status),

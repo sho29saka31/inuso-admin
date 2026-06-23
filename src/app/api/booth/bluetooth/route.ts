@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getDb, nowTimestamp } from "@/lib/firebase-admin";
 import { saveChangeLog } from "@/lib/changelog";
 import { sendAdminNotification } from "@/lib/fcm-notify";
+import { safeCompare } from "@/lib/safe-compare";
 
 // C-3 ハイブリッド型混雑レベル算出
 const deviceHistory: Map<string, number[]> = new Map();
@@ -28,7 +29,8 @@ function calcStatus(boothId: string, deviceCount: number, baselineMax?: number):
 export async function POST(req: NextRequest) {
   const authHeader = req.headers.get("authorization") ?? "";
   const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
-  if (token !== process.env.BLUETOOTH_SECRET) {
+  const btSecret = process.env.BLUETOOTH_SECRET;
+  if (!btSecret || !token || !safeCompare(token, btSecret)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
