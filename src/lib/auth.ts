@@ -56,7 +56,8 @@ export async function checkCredential(stage: "id" | "pw" | "pin", value: string)
   }
   if (stage === "pin") {
     const expected = process.env.DB_ADMIN_PIN;
-    return !!expected && safeCompare(value, expected);
+    if (!expected) return true; // PIN未設定時はオプション扱い
+    return safeCompare(value, expected);
   }
   return false;
 }

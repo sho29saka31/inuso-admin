@@ -3,7 +3,12 @@
 import { redirect } from "next/navigation";
 import { getDb, nowTimestamp } from "@/lib/firebase-admin";
 import { saveChangeLog } from "@/lib/changelog";
+import { verifySession } from "@/lib/auth";
 import { getMessaging } from "firebase-admin/messaging";
+
+async function requireSession() {
+  if (!await verifySession()) throw new Error("Unauthorized");
+}
 
 async function revalidateViewer(paths: string[]) {
   const viewerUrl = process.env.VIEWER_REVALIDATE_URL;
@@ -31,6 +36,7 @@ async function sendFcmPush(title: string, body: string, target: string, noticeId
 }
 
 export async function createNotice(formData: FormData) {
+  await requireSession();
   const db = getDb();
   const now = nowTimestamp();
   const noticeId = `notice-${Date.now()}`;
@@ -63,6 +69,7 @@ export async function createNotice(formData: FormData) {
 }
 
 export async function updateNotice(noticeId: string, formData: FormData) {
+  await requireSession();
   const db = getDb();
   const now = nowTimestamp();
   const fields = {
@@ -87,6 +94,7 @@ export async function updateNotice(noticeId: string, formData: FormData) {
 }
 
 export async function deleteNotice(noticeId: string) {
+  await requireSession();
   const db = getDb();
   await db.collection("notices").doc(noticeId).delete();
   await saveChangeLog({

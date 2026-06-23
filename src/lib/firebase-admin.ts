@@ -30,5 +30,6 @@ export function nowTimestamp() {
   return {
     display: now.toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" }).replace(/\//g, "/").replace(",", ""),
     unix: now.getTime(),
+    seconds: Math.floor(now.getTime() / 1000),
   };
 }
