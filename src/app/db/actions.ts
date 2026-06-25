@@ -18,7 +18,11 @@ export async function loginAction(formData: FormData) {
     return { error: "PINが正しくありません", stage: 3 };
   }
 
-  await createSession();
+  try {
+    await createSession();
+  } catch {
+    return { error: "セッション作成に失敗しました。管理者に連絡してください。", stage: 3 };
+  }
   redirect("/db/booth");
 }
 

@@ -34,15 +34,20 @@ export function LoginForm() {
       return;
     }
 
-    const result = await loginAction(fd);
-    if (result?.error) {
-      setError(result.error);
-      setStage(result.stage ?? 1);
-      if (result.stage === 1) { setId(""); setPw(""); setPin(""); }
-      if (result.stage === 2) { setPw(""); setPin(""); }
-      if (result.stage === 3) { setPin(""); }
+    try {
+      const result = await loginAction(fd);
+      if (result?.error) {
+        setError(result.error);
+        setStage(result.stage ?? 1);
+        if (result.stage === 1) { setId(""); setPw(""); setPin(""); }
+        if (result.stage === 2) { setPw(""); setPin(""); }
+        if (result.stage === 3) { setPin(""); }
+      }
+    } catch {
+      setError("ログイン処理に失敗しました。時間をおいて再度お試しください。");
+    } finally {
+      setPending(false);
     }
-    setPending(false);
   }
 
   return (
