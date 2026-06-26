@@ -31,14 +31,18 @@ npm install
 # Firebase コンソール → プロジェクト設定 → サービスアカウント → 新しい秘密鍵の生成
 FIREBASE_SERVICE_ACCOUNT_JSON={"type":"service_account","project_id":"..."}
 
+# JWT 署名鍵（運営オペレーター・DB管理者の両セッションで共用）
+# 生成: openssl rand -base64 32
+SESSION_SECRET=your_jwt_secret_32chars_or_more
+
 # DB管理者認証
-DB_ADMIN_PASSWORD=your_db_admin_password
-DB_SESSION_SECRET=your_jwt_secret_32chars_or_more
+DB_ADMIN_ID=your_db_admin_id
+DB_ADMIN_PW=your_db_admin_password
+DB_ADMIN_PIN=1234   # 任意。未設定時はPINステージをスキップ
 
 # 運営オペレーター認証（JSON形式: {"スコープ名": "パスワード", ...}）
 # 例: {"実行委員": "pass1", "1-1": "pass2", "eスポーツ部": "pass3"}
 ADMIN_PASSWORDS={"実行委員":"password","教員":"password"}
-ADMIN_OPERATOR_SECRET=your_operator_jwt_secret_32chars_or_more
 
 # Viewer ISR 無効化（inuso-viewer の本番 URL を設定）
 VIEWER_REVALIDATE_URL=https://your-viewer.vercel.app/api/revalidate
@@ -47,6 +51,8 @@ VIEWER_REVALIDATE_SECRET=same_value_as_viewer_REVALIDATE_SECRET
 # Bluetooth データ受信 API（Surface Go 2 から送られてくるトークン）
 BLUETOOTH_SECRET=your_bluetooth_bearer_token
 ```
+
+> セキュリティ設計の詳細は [`docs/security.md`](./security.md) を参照してください。
 
 ### 3. ローカル起動確認
 
