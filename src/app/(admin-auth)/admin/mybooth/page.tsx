@@ -19,7 +19,7 @@ const SCOPE_TO_BOOTH_ID: Record<string, string> = {
   "1-1": "class1-1", "1-2": "class1-2", "1-3": "class1-3", "1-4": "class1-4",
   "2-1": "class2-1", "2-2": "class2-2", "2-3": "class2-3", "2-4": "class2-4",
   "3-1": "class3-1", "3-2": "class3-2", "3-3": "class3-3", "3-4": "class3-4",
-  "eスポーツ部": "club-game",
+  "eスポーツ部": "club-esports",
   "美術部": "club-art",
   "有志発表": "pe-gym",
 };
