@@ -3,6 +3,7 @@ import { getDb, nowTimestamp } from "@/lib/firebase-admin";
 import { revalidatePath } from "next/cache";
 import { saveChangeLog } from "@/lib/changelog";
 import { verifySession } from "@/lib/auth";
+import { ToggleButton, BulkButton } from "./ToggleButton";
 
 async function getAccountStatuses(): Promise<Record<string, boolean>> {
   try {
@@ -97,15 +98,11 @@ export default async function AccountsPage() {
       <div className="flex gap-2">
         <form action={bulkToggle} className="flex-1">
           <input type="hidden" name="enabled" value="true" />
-          <button type="submit" className="w-full py-1.5 rounded-lg border border-primary text-primary text-sm font-medium hover:bg-primary hover:text-white transition-colors">
-            全てON
-          </button>
+          <BulkButton label="全てON" />
         </form>
         <form action={bulkToggle} className="flex-1">
           <input type="hidden" name="enabled" value="false" />
-          <button type="submit" className="w-full py-1.5 rounded-lg border border-danger text-danger text-sm font-medium hover:bg-danger hover:text-white transition-colors">
-            全てOFF
-          </button>
+          <BulkButton label="全てOFF" danger />
         </form>
       </div>
 
@@ -118,17 +115,7 @@ export default async function AccountsPage() {
               <form action={toggleAccount}>
                 <input type="hidden" name="scope" value={scope} />
                 <input type="hidden" name="enabled" value={enabled ? "false" : "true"} />
-                <button
-                  type="submit"
-                  aria-label={enabled ? "OFFにする" : "ONにする"}
-                  className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none"
-                  style={{ backgroundColor: enabled ? "var(--color-primary, #1EA78C)" : "#D1D5DB" }}
-                >
-                  <span
-                    className="inline-block h-4 w-4 rounded-full bg-white shadow transition-transform"
-                    style={{ transform: enabled ? "translateX(1.375rem)" : "translateX(0.25rem)" }}
-                  />
-                </button>
+                <ToggleButton enabled={enabled} />
               </form>
             </div>
           );
