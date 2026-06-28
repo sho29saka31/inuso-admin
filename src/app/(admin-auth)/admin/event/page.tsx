@@ -1,6 +1,8 @@
 export const dynamic = "force-dynamic";
 import Link from "next/link";
 import { getDb } from "@/lib/firebase-admin";
+import { getAdminFeatures } from "@/lib/feature-flags";
+import FeatureDisabled from "@/components/FeatureDisabled";
 
 interface Event {
   eventId: string;
@@ -38,6 +40,7 @@ async function getEvents() {
 }
 
 export default async function AdminEventPage() {
+  if (!(await getAdminFeatures()).event) return <FeatureDisabled />;
   const events = await getEvents();
 
   if (events === null) {
