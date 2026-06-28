@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@fontsource/m-plus-rounded-1c": "^5.2.10",
     "@sentry/nextjs": "^10.59.0",
     "firebase": "^12.15.0",
     "firebase-admin": "^14.0.0",

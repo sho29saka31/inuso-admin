@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 import { getDb } from "@/lib/firebase-admin";
 import { getAdminScope } from "@/lib/admin-auth";
 import { isFullAccess } from "@/lib/admin-scope";
+import { getAdminFeatures } from "@/lib/feature-flags";
+import FeatureDisabled from "@/components/FeatureDisabled";
 
 const STATUS_LABELS = ["停止中", "非常に閑散", "閑散", "通常", "混雑", "非常に混雑"];
 const STATUS_COLORS = [
@@ -28,6 +30,7 @@ async function getBooths() {
 }
 
 export default async function AdminBoothPage() {
+  if (!(await getAdminFeatures()).booth) return <FeatureDisabled />;
   const scope = await getAdminScope();
   // 限定アクセスユーザーはマイブースへリダイレクト（全ブース閲覧不可）
   if (!scope || !isFullAccess(scope)) {

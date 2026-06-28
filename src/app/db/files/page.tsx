@@ -49,6 +49,26 @@ async function saveFiles(formData: FormData) {
   revalidatePath("/db/files");
 }
 
+async function clearImageUrl() {
+  "use server";
+  const db = getDb();
+  const now = nowTimestamp();
+  const fields = { imageUrl: "", updatedAt: now };
+  await db.collection("config").doc("map").set(fields, { merge: true });
+  await saveChangeLog({ operatorId: "db-admin", targetCollection: "config", targetId: "map", changeType: "update", changedFields: fields });
+  revalidatePath("/db/files");
+}
+
+async function clearPdfUrl() {
+  "use server";
+  const db = getDb();
+  const now = nowTimestamp();
+  const fields = { pdfUrl: "", updatedAt: now };
+  await db.collection("config").doc("digital").set(fields, { merge: true });
+  await saveChangeLog({ operatorId: "db-admin", targetCollection: "config", targetId: "digital", changeType: "update", changedFields: fields });
+  revalidatePath("/db/files");
+}
+
 export default async function FilesPage() {
   const { map, digital } = await getFilesConfig();
   const hasError = map === null || digital === null;
@@ -77,6 +97,11 @@ export default async function FilesPage() {
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={currentImageUrl} alt="マッププレビュー" className="w-full h-auto max-h-48 object-contain bg-gray-50" />
                   </div>
+                  <form action={clearImageUrl}>
+                    <button type="submit" className="mt-1 text-xs text-danger border border-danger rounded px-2 py-1">
+                      値をクリア
+                    </button>
+                  </form>
                 </>
               ) : (
                 <p className="text-sm text-text-sub">未設定</p>
@@ -100,7 +125,14 @@ export default async function FilesPage() {
             <div className="flex flex-col gap-1">
               <span className="text-xs text-text-sub font-medium">現在の設定値</span>
               {currentPdfUrl ? (
-                <p className="text-sm text-text-main break-all">{currentPdfUrl}</p>
+                <>
+                  <p className="text-sm text-text-main break-all">{currentPdfUrl}</p>
+                  <form action={clearPdfUrl}>
+                    <button type="submit" className="mt-1 text-xs text-danger border border-danger rounded px-2 py-1">
+                      値をクリア
+                    </button>
+                  </form>
+                </>
               ) : (
                 <p className="text-sm text-text-sub">未設定</p>
               )}
