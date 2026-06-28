@@ -23,6 +23,7 @@ export default async function AdminAuthLayout({
         </svg>
         <h1 className="text-lg font-bold">運営サービスは現在停止中です</h1>
         <p className="text-sm text-text-sub">DB管理者画面からサービスを再開してください。</p>
+        <a href="/db/features" className="mt-2 text-sm text-blue-600 underline">DB管理者画面 → 機能設定</a>
       </div>
     );
   }
