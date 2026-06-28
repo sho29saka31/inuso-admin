@@ -38,7 +38,10 @@ async function saveFeatures(docId: string, formData: FormData, keys: string[]) {
   });
   if (docId === "viewer_features") {
     revalidateTag("viewer-features", "max");
-    await revalidateViewer(["/", "/event", "/booth", "/busy", "/eat", "/notice", "/digital", "/map"]);
+    await revalidateViewer(
+      ["/", "/event", "/booth", "/busy", "/eat", "/notice", "/digital", "/map"],
+      ["viewer-features"]
+    );
   }
   if (docId === "admin_features") {
     revalidateTag("admin-features", "max");
