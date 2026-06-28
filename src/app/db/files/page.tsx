@@ -1,5 +1,6 @@
 export const dynamic = "force-dynamic";
 import { getDb, nowTimestamp } from "@/lib/firebase-admin";
+import { ClearButton, SaveButton } from "./ClearButton";
 import { saveChangeLog } from "@/lib/changelog";
 import { revalidatePath } from "next/cache";
 
@@ -103,9 +104,7 @@ export default async function FilesPage() {
                 <img src={currentImageUrl} alt="マッププレビュー" className="w-full h-auto max-h-48 object-contain bg-gray-50" />
               </div>
               <form action={clearImageUrl} className="mt-1">
-                <button type="submit" className="text-xs text-danger border border-danger rounded px-2 py-1">
-                  値をクリア
-                </button>
+                <ClearButton label="値をクリア" />
               </form>
             </>
           ) : (
@@ -124,9 +123,7 @@ export default async function FilesPage() {
             />
             <input type="hidden" name="pdfUrl" value="" />
           </label>
-          <button type="submit" className="w-full py-2.5 rounded-lg bg-primary text-white font-bold text-sm">
-            マップ画像を保存
-          </button>
+          <SaveButton label="マップ画像を保存" />
         </form>
       </section>
 
@@ -140,9 +137,7 @@ export default async function FilesPage() {
             <>
               <p className="text-sm text-text-main break-all">{currentPdfUrl}</p>
               <form action={clearPdfUrl} className="mt-1">
-                <button type="submit" className="text-xs text-danger border border-danger rounded px-2 py-1">
-                  値をクリア
-                </button>
+                <ClearButton label="値をクリア" />
               </form>
             </>
           ) : (
@@ -161,9 +156,7 @@ export default async function FilesPage() {
             />
             <input type="hidden" name="imageUrl" value="" />
           </label>
-          <button type="submit" className="w-full py-2.5 rounded-lg bg-primary text-white font-bold text-sm">
-            PDFを保存
-          </button>
+          <SaveButton label="PDFを保存" />
         </form>
       </section>
 
