@@ -5,12 +5,13 @@ import { saveChangeLog } from "@/lib/changelog";
 import { verifySession } from "@/lib/auth";
 
 function parseProducts(formData: FormData) {
-  const products: { name: string; price: number }[] = [];
+  const products: { name: string; price: number; imageUrl?: string }[] = [];
   let i = 0;
   while (formData.has(`product_name_${i}`)) {
     const name = (formData.get(`product_name_${i}`) as string).trim();
     const price = Number(formData.get(`product_price_${i}`) ?? 0);
-    if (name) products.push({ name, price });
+    const imageUrl = (formData.get(`product_imageUrl_${i}`) as string | null)?.trim() || undefined;
+    if (name) products.push({ name, price, ...(imageUrl ? { imageUrl } : {}) });
     i++;
   }
   return products;

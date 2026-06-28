@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
-import { M_PLUS_Rounded_1c } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
-const mPlusRounded = M_PLUS_Rounded_1c({
-  weight: ["400", "500", "700", "800"],
-  subsets: ["latin"],
+const mPlusRounded = localFont({
+  src: [
+    { path: "../../node_modules/@fontsource/m-plus-rounded-1c/files/m-plus-rounded-1c-japanese-400-normal.woff2", weight: "400" },
+    { path: "../../node_modules/@fontsource/m-plus-rounded-1c/files/m-plus-rounded-1c-japanese-500-normal.woff2", weight: "500" },
+    { path: "../../node_modules/@fontsource/m-plus-rounded-1c/files/m-plus-rounded-1c-japanese-700-normal.woff2", weight: "700" },
+    { path: "../../node_modules/@fontsource/m-plus-rounded-1c/files/m-plus-rounded-1c-japanese-800-normal.woff2", weight: "800" },
+  ],
   display: "swap",
 });
 
