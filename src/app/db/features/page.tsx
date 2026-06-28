@@ -37,11 +37,11 @@ async function saveFeatures(docId: string, formData: FormData, keys: string[]) {
     changedFields: fields as unknown as Record<string, unknown>,
   });
   if (docId === "viewer_features") {
-    revalidateTag("viewer-features");
+    revalidateTag("viewer-features", "max");
     await revalidateViewer(["/", "/event", "/booth", "/busy", "/eat", "/notice", "/digital", "/map"]);
   }
   if (docId === "admin_features") {
-    revalidateTag("admin-features");
+    revalidateTag("admin-features", "max");
   }
   revalidatePath("/db/features");
 }
