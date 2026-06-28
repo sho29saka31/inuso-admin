@@ -1,9 +1,10 @@
 export const dynamic = "force-dynamic";
 import { getDb, nowTimestamp } from "@/lib/firebase-admin";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { saveChangeLog } from "@/lib/changelog";
 import { verifySession } from "@/lib/auth";
 import { revalidateViewer } from "@/lib/revalidate";
+import { SubmitButton } from "./SubmitButton";
 
 interface Features {
   [key: string]: boolean;
@@ -36,13 +37,18 @@ async function saveFeatures(docId: string, formData: FormData, keys: string[]) {
     changedFields: fields as unknown as Record<string, unknown>,
   });
   if (docId === "viewer_features") {
+    revalidateTag("viewer-features");
     await revalidateViewer(["/", "/event", "/booth", "/busy", "/eat", "/notice", "/digital", "/map"]);
+  }
+  if (docId === "admin_features") {
+    revalidateTag("admin-features");
   }
   revalidatePath("/db/features");
 }
 
-const VIEWER_KEYS = ["event", "booth", "busy", "eat", "notice", "digital", "map"];
+const VIEWER_KEYS = ["service", "event", "booth", "busy", "eat", "notice", "digital", "map"];
 const VIEWER_LABELS: Record<string, string> = {
+  service: "【サービス全体】Viewerを公開する",
   event: "イベントスケジュール",
   booth: "ブース一覧",
   busy: "混雑状況",
@@ -52,8 +58,9 @@ const VIEWER_LABELS: Record<string, string> = {
   map: "校内マップ",
 };
 
-const ADMIN_KEYS = ["notice", "booth", "event", "eat"];
+const ADMIN_KEYS = ["service", "notice", "booth", "event", "eat"];
 const ADMIN_LABELS: Record<string, string> = {
+  service: "【サービス全体】Admin運営画面を公開する",
   notice: "お知らせ管理",
   booth: "ブース管理",
   event: "イベント管理",
@@ -85,9 +92,13 @@ export default async function FeaturesPage() {
         <form action={saveViewerFeatures} className="flex flex-col gap-3">
           {VIEWER_KEYS.map((key) => {
             const enabled = viewerFeatures[key] !== false;
+            const isService = key === "service";
             return (
-              <label key={key} className="flex items-center justify-between py-2 border-b last:border-b-0">
-                <span className="text-sm">{VIEWER_LABELS[key]}</span>
+              <label
+                key={key}
+                className={`flex items-center justify-between py-2 border-b last:border-b-0 ${isService ? "font-semibold bg-blue-50 px-2 rounded-lg" : ""}`}
+              >
+                <span className={`text-sm ${isService ? "text-blue-800" : ""}`}>{VIEWER_LABELS[key]}</span>
                 <input
                   type="checkbox"
                   name={key}
@@ -97,9 +108,7 @@ export default async function FeaturesPage() {
               </label>
             );
           })}
-          <button type="submit" className="w-full py-2 rounded-lg bg-primary text-white font-bold text-sm mt-1">
-            Viewer設定を保存
-          </button>
+          <SubmitButton label="Viewer設定を保存" />
         </form>
       </section>
 
@@ -108,9 +117,13 @@ export default async function FeaturesPage() {
         <form action={saveAdminFeatures} className="flex flex-col gap-3">
           {ADMIN_KEYS.map((key) => {
             const enabled = adminFeatures[key] !== false;
+            const isService = key === "service";
             return (
-              <label key={key} className="flex items-center justify-between py-2 border-b last:border-b-0">
-                <span className="text-sm">{ADMIN_LABELS[key]}</span>
+              <label
+                key={key}
+                className={`flex items-center justify-between py-2 border-b last:border-b-0 ${isService ? "font-semibold bg-orange-50 px-2 rounded-lg" : ""}`}
+              >
+                <span className={`text-sm ${isService ? "text-orange-800" : ""}`}>{ADMIN_LABELS[key]}</span>
                 <input
                   type="checkbox"
                   name={key}
@@ -120,9 +133,7 @@ export default async function FeaturesPage() {
               </label>
             );
           })}
-          <button type="submit" className="w-full py-2 rounded-lg bg-primary text-white font-bold text-sm mt-1">
-            Admin設定を保存
-          </button>
+          <SubmitButton label="Admin設定を保存" />
         </form>
       </section>
 

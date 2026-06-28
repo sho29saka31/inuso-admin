@@ -76,86 +76,98 @@ export default async function FilesPage() {
   const currentImageUrl = (map?.imageUrl as string) ?? "";
   const currentPdfUrl = (digital?.pdfUrl as string) ?? "";
 
+  if (hasError) {
+    return (
+      <div className="flex flex-col gap-6">
+        <h1 className="text-xl font-bold">ファイル設定</h1>
+        <p className="text-danger text-sm">Firebase未設定。</p>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <h1 className="text-xl font-bold">ファイル設定</h1>
 
-      {hasError ? (
-        <p className="text-danger text-sm">Firebase未設定。</p>
-      ) : (
-        <form action={saveFiles} className="flex flex-col gap-6">
+      {/* 校舎マップ画像 */}
+      <section className="flex flex-col gap-3">
+        <h2 className="text-base font-semibold border-b pb-1">校舎マップ画像</h2>
 
-          <section className="flex flex-col gap-3">
-            <h2 className="text-base font-semibold border-b pb-1">校舎マップ画像</h2>
+        <div className="flex flex-col gap-1">
+          <span className="text-xs text-text-sub font-medium">現在の設定値</span>
+          {currentImageUrl ? (
+            <>
+              <p className="text-sm text-text-main break-all">{currentImageUrl}</p>
+              <div className="rounded-lg overflow-hidden border mt-1">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={currentImageUrl} alt="マッププレビュー" className="w-full h-auto max-h-48 object-contain bg-gray-50" />
+              </div>
+              <form action={clearImageUrl} className="mt-1">
+                <button type="submit" className="text-xs text-danger border border-danger rounded px-2 py-1">
+                  値をクリア
+                </button>
+              </form>
+            </>
+          ) : (
+            <p className="text-sm text-text-sub">未設定</p>
+          )}
+        </div>
 
-            <div className="flex flex-col gap-1">
-              <span className="text-xs text-text-sub font-medium">現在の設定値</span>
-              {currentImageUrl ? (
-                <>
-                  <p className="text-sm text-text-main break-all">{currentImageUrl}</p>
-                  <div className="rounded-lg overflow-hidden border mt-1">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={currentImageUrl} alt="マッププレビュー" className="w-full h-auto max-h-48 object-contain bg-gray-50" />
-                  </div>
-                  <form action={clearImageUrl}>
-                    <button type="submit" className="mt-1 text-xs text-danger border border-danger rounded px-2 py-1">
-                      値をクリア
-                    </button>
-                  </form>
-                </>
-              ) : (
-                <p className="text-sm text-text-sub">未設定</p>
-              )}
-            </div>
-
-            <label className="flex flex-col gap-1">
-              <span className="text-sm font-medium">新しいURLに変更する場合</span>
-              <input
-                name="imageUrl"
-                type="url"
-                className="border rounded-lg px-3 py-2 text-sm"
-                placeholder="https://..."
-              />
-            </label>
-          </section>
-
-          <section className="flex flex-col gap-3">
-            <h2 className="text-base font-semibold border-b pb-1">デジタルパンフレット (PDF)</h2>
-
-            <div className="flex flex-col gap-1">
-              <span className="text-xs text-text-sub font-medium">現在の設定値</span>
-              {currentPdfUrl ? (
-                <>
-                  <p className="text-sm text-text-main break-all">{currentPdfUrl}</p>
-                  <form action={clearPdfUrl}>
-                    <button type="submit" className="mt-1 text-xs text-danger border border-danger rounded px-2 py-1">
-                      値をクリア
-                    </button>
-                  </form>
-                </>
-              ) : (
-                <p className="text-sm text-text-sub">未設定</p>
-              )}
-            </div>
-
-            <label className="flex flex-col gap-1">
-              <span className="text-sm font-medium">新しいURLに変更する場合</span>
-              <input
-                name="pdfUrl"
-                type="url"
-                className="border rounded-lg px-3 py-2 text-sm"
-                placeholder="https://..."
-              />
-            </label>
-          </section>
-
-          <p className="text-xs text-text-sub">入力がない項目は変更されません。</p>
-
+        <form action={saveFiles} className="flex flex-col gap-3">
+          <label className="flex flex-col gap-1">
+            <span className="text-sm font-medium">新しいURLに変更する場合</span>
+            <input
+              name="imageUrl"
+              type="url"
+              className="border rounded-lg px-3 py-2 text-sm"
+              placeholder="https://..."
+            />
+            <input type="hidden" name="pdfUrl" value="" />
+          </label>
           <button type="submit" className="w-full py-2.5 rounded-lg bg-primary text-white font-bold text-sm">
-            保存
+            マップ画像を保存
           </button>
         </form>
-      )}
+      </section>
+
+      {/* デジタルパンフレット */}
+      <section className="flex flex-col gap-3">
+        <h2 className="text-base font-semibold border-b pb-1">デジタルパンフレット (PDF)</h2>
+
+        <div className="flex flex-col gap-1">
+          <span className="text-xs text-text-sub font-medium">現在の設定値</span>
+          {currentPdfUrl ? (
+            <>
+              <p className="text-sm text-text-main break-all">{currentPdfUrl}</p>
+              <form action={clearPdfUrl} className="mt-1">
+                <button type="submit" className="text-xs text-danger border border-danger rounded px-2 py-1">
+                  値をクリア
+                </button>
+              </form>
+            </>
+          ) : (
+            <p className="text-sm text-text-sub">未設定</p>
+          )}
+        </div>
+
+        <form action={saveFiles} className="flex flex-col gap-3">
+          <label className="flex flex-col gap-1">
+            <span className="text-sm font-medium">新しいURLに変更する場合</span>
+            <input
+              name="pdfUrl"
+              type="url"
+              className="border rounded-lg px-3 py-2 text-sm"
+              placeholder="https://..."
+            />
+            <input type="hidden" name="imageUrl" value="" />
+          </label>
+          <button type="submit" className="w-full py-2.5 rounded-lg bg-primary text-white font-bold text-sm">
+            PDFを保存
+          </button>
+        </form>
+      </section>
+
+      <p className="text-xs text-text-sub">入力がない項目は変更されません。</p>
     </div>
   );
 }
