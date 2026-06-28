@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { setOperatorSession } from "@/lib/admin-auth";
 import { safeCompare } from "@/lib/safe-compare";
+import { isAccountEnabled } from "@/lib/feature-flags";
 
 function getPasswords(): Record<string, string> {
   const raw = process.env.ADMIN_PASSWORDS;
@@ -28,6 +29,10 @@ export async function POST(req: NextRequest) {
   const expected = passwords[scope];
   if (!expected || !safeCompare(expected, password)) {
     return NextResponse.json({ error: "パスワードが違います" }, { status: 401 });
+  }
+
+  if (!await isAccountEnabled(scope)) {
+    return NextResponse.json({ error: "このアカウントは現在無効です" }, { status: 403 });
   }
 
   await setOperatorSession(scope, scope);

@@ -1,6 +1,8 @@
 export const dynamic = "force-dynamic";
 import Link from "next/link";
 import { getDb } from "@/lib/firebase-admin";
+import { getAdminFeatures } from "@/lib/feature-flags";
+import FeatureDisabled from "@/components/FeatureDisabled";
 
 const STATUS_LABELS = ["停止中", "非常に閑散", "閑散", "通常", "混雑", "非常に混雑"];
 const STATUS_COLORS = [
@@ -31,6 +33,7 @@ async function getEatBooths() {
 }
 
 export default async function AdminEatPage() {
+  if (!(await getAdminFeatures()).eat) return <FeatureDisabled />;
   const booths = await getEatBooths();
 
   return (

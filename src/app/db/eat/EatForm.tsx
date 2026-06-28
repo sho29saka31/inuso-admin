@@ -8,6 +8,7 @@ import LoadingOverlay from "@/components/LoadingOverlay";
 interface Product {
   name: string;
   price: number;
+  imageUrl?: string;
 }
 
 interface EatFormProps {
@@ -24,18 +25,18 @@ export function EatForm({ action, defaultValues = {} }: EatFormProps) {
   const [products, setProducts] = useState<Product[]>(
     defaultValues.products && defaultValues.products.length > 0
       ? defaultValues.products
-      : [{ name: "", price: 0 }]
+      : [{ name: "", price: 0, imageUrl: "" }]
   );
 
   function addProduct() {
-    setProducts((prev) => [...prev, { name: "", price: 0 }]);
+    setProducts((prev) => [...prev, { name: "", price: 0, imageUrl: "" }]);
   }
 
   function removeProduct(index: number) {
     setProducts((prev) => prev.filter((_, i) => i !== index));
   }
 
-  function updateProduct(index: number, field: "name" | "price", value: string) {
+  function updateProduct(index: number, field: "name" | "price" | "imageUrl", value: string) {
     setProducts((prev) =>
       prev.map((p, i) => (i === index ? { ...p, [field]: field === "price" ? Number(value) : value } : p))
     );
@@ -50,6 +51,7 @@ export function EatForm({ action, defaultValues = {} }: EatFormProps) {
     products.forEach((p, i) => {
       fd.set(`product_name_${i}`, p.name);
       fd.set(`product_price_${i}`, String(p.price));
+      fd.set(`product_imageUrl_${i}`, p.imageUrl ?? "");
     });
     startTransition(async () => { await action(fd); });
   }
@@ -77,28 +79,41 @@ export function EatForm({ action, defaultValues = {} }: EatFormProps) {
           </button>
         </div>
         {products.map((p, i) => (
-          <div key={i} className="flex gap-2 items-center">
-            <input
-              value={p.name}
-              onChange={(e) => updateProduct(i, "name", e.target.value)}
-              placeholder="商品名"
-              className="flex-1 border rounded-lg px-3 py-2 text-sm"
-            />
-            <div className="flex items-center border rounded-lg overflow-hidden">
+          <div key={i} className="flex flex-col gap-1.5 border rounded-lg p-2">
+            <div className="flex gap-2 items-center">
               <input
-                value={p.price}
-                onChange={(e) => updateProduct(i, "price", e.target.value)}
-                type="number"
-                min={0}
-                placeholder="値段"
-                className="w-24 px-3 py-2 text-sm outline-none"
+                value={p.name}
+                onChange={(e) => updateProduct(i, "name", e.target.value)}
+                placeholder="商品名"
+                className="flex-1 border rounded-lg px-3 py-2 text-sm"
               />
-              <span className="pr-2 text-sm text-text-sub">円</span>
+              <div className="flex items-center border rounded-lg overflow-hidden">
+                <input
+                  value={p.price}
+                  onChange={(e) => updateProduct(i, "price", e.target.value)}
+                  type="number"
+                  min={0}
+                  placeholder="値段"
+                  className="w-24 px-3 py-2 text-sm outline-none"
+                />
+                <span className="pr-2 text-sm text-text-sub">円</span>
+              </div>
+              {products.length > 1 && (
+                <button type="button" onClick={() => removeProduct(i)} className="text-danger text-xs px-2">
+                  ✕
+                </button>
+              )}
             </div>
-            {products.length > 1 && (
-              <button type="button" onClick={() => removeProduct(i)} className="text-danger text-xs px-2">
-                ✕
-              </button>
+            <input
+              value={p.imageUrl ?? ""}
+              onChange={(e) => updateProduct(i, "imageUrl", e.target.value)}
+              type="url"
+              placeholder="商品画像URL（任意）"
+              className="border rounded-lg px-3 py-2 text-sm text-text-sub"
+            />
+            {p.imageUrl && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={p.imageUrl} alt="プレビュー" className="h-16 w-16 object-cover rounded border" />
             )}
           </div>
         ))}

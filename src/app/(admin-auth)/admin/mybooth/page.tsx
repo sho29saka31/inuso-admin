@@ -30,7 +30,8 @@ function boothMatchesScope(booth: Record<string, unknown>, scope: string): boole
   if (scope === "PTAバザー") return (booth.type as string) === "pta";
   const targetId = SCOPE_TO_BOOTH_ID[scope];
   if (targetId) return (booth.boothId as string) === targetId;
-  return false;
+  // Firestoreのscopeフィールドでフォールバック照合
+  return (booth.scope as string) === scope;
 }
 
 async function getBooths(scope: string) {
