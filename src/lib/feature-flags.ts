@@ -42,7 +42,7 @@ export const getViewerFeatures = unstable_cache(
     }
   },
   ["viewer-features"],
-  { tags: ["viewer-features"], revalidate: 60 }
+  { tags: ["viewer-features"] }
 );
 
 export const getAdminFeatures = unstable_cache(
@@ -56,7 +56,7 @@ export const getAdminFeatures = unstable_cache(
     }
   },
   ["admin-features"],
-  { tags: ["admin-features"], revalidate: 60 }
+  { tags: ["admin-features"] }
 );
 
 export async function getAdminAccounts(): Promise<Record<string, boolean>> {
