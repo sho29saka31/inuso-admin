@@ -4,6 +4,37 @@
 
 ---
 
+## 2026-06-29
+
+- Feat: 機能 ON/OFF システムを実装（`config/viewer_features` / `config/admin_features`）([#87](https://github.com/sho29saka31/inuso-admin/pull/87))
+- Feat: DB管理者画面に `/db/features` ページを追加（viewer・admin 各機能をトグルスイッチで制御）([#87](https://github.com/sho29saka31/inuso-admin/pull/87), [#93](https://github.com/sho29saka31/inuso-admin/pull/93))
+- Feat: 運営オペレーターアカウントの有効/無効管理（`config/admin_accounts`）([#87](https://github.com/sho29saka31/inuso-admin/pull/87))
+- Feat: DB管理者画面に `/db/accounts` ページを追加（トグルスイッチ型 + 一括制御ボタン）([#87](https://github.com/sho29saka31/inuso-admin/pull/87), [#89](https://github.com/sho29saka31/inuso-admin/pull/89))
+- Feat: ログイン時のアカウント有効チェックを追加（`isAccountEnabled()`）([#87](https://github.com/sho29saka31/inuso-admin/pull/87))
+- Feat: 飲食ブース商品ごとの画像設定機能（Firebase Storage + `products[].imageUrl`）([#87](https://github.com/sho29saka31/inuso-admin/pull/87))
+- Feat: DB管理者ファイル項目に「値をクリア」ボタンを追加([#87](https://github.com/sho29saka31/inuso-admin/pull/87), [#89](https://github.com/sho29saka31/inuso-admin/pull/89))
+- Feat: ブース編集画面の混雑状態をドロップダウン→スライダーに変更・停止トグル追加([#95](https://github.com/sho29saka31/inuso-admin/pull/95))
+- Feat: DB管理者画面に `/db/bluetooth` ページを追加（全ブースの手動/自動モード一括制御）([#95](https://github.com/sho29saka31/inuso-admin/pull/95))
+- Security: JWT Cookie を `admin_operator` / `admin_scope` 平文 Cookie から署名付き `admin_session` JWT に完全移行([#80](https://github.com/sho29saka31/inuso-admin/pull/80))
+- Security: JWT 署名鍵のハードコードfallback除去（`SESSION_SECRET` 未設定時は起動エラー）([#80](https://github.com/sho29saka31/inuso-admin/pull/80))
+- Security: `ADMIN_PASSWORDS` 未設定時を fail-closed（401）に変更([#80](https://github.com/sho29saka31/inuso-admin/pull/80))
+- Security: `safeCompare()` ユーティリティ（`src/lib/safe-compare.ts`）を追加・全シークレット比較に適用([#80](https://github.com/sho29saka31/inuso-admin/pull/80))
+- Security: 通知 send/update で限定スコープの `target` を `"all"` に強制・`authorId` を固定([#80](https://github.com/sho29saka31/inuso-admin/pull/80))
+- Security: ブース update で担当外スコープは 403 Forbidden（[#80](https://github.com/sho29saka31/inuso-admin/pull/80), [#97](https://github.com/sho29saka31/inuso-admin/pull/97)で保健委員会などの例外対応も修正）
+- Security: イベント update をフルアクセスのみに制限([#80](https://github.com/sho29saka31/inuso-admin/pull/80))
+- Security: 通知 delete に所有者チェックを追加（限定スコープは自分のお知らせのみ削除可）([#80](https://github.com/sho29saka31/inuso-admin/pull/80))
+- Security: DB Server Actions 全体に `verifySession()` 認証を追加([#80](https://github.com/sho29saka31/inuso-admin/pull/80))
+- Security: `POST /api/revalidate` の env 未設定バイパスを修正（fail-closed）([#80](https://github.com/sho29saka31/inuso-admin/pull/80))
+- Fix: DB管理者ログインフリーズ修正（`createSession()` 失敗時に throw → return に変更）([#82](https://github.com/sho29saka31/inuso-admin/pull/82))
+- Fix: `DB_ADMIN_PIN` 未設定時は PIN ステージをスキップ（以前は常に認証失敗していた）([#80](https://github.com/sho29saka31/inuso-admin/pull/80))
+- Fix: 機能フラグ変更時に `revalidateViewer()` で ISR キャッシュを即時無効化([#91](https://github.com/sho29saka31/inuso-admin/pull/91))
+- Docs: `README.md` の環境変数名を正しい名称に修正（`SESSION_SECRET` / `BLUETOOTH_SECRET` 等）
+- Docs: `docs/data-model.md` に `config/viewer_features` / `config/admin_features` / `config/admin_accounts` を追加
+- Docs: `docs/architecture.md` に機能 ON/OFF システムのセクションを追加
+- Docs: `docs/troubleshooting.md` にアカウント無効エラーの対処を追加
+
+---
+
 ## 2026-06-23
 
 - Docs: デプロイ手順・オペレーターアカウント管理を追加 (`docs/deployment.md`)
