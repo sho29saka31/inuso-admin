@@ -14,7 +14,7 @@
 | **DB管理者** | `/db/*` | Firestoreの全データを閲覧・作成・編集・削除できる上位権限 |
 | **運営オペレーター** | `/admin/*` | 混雑状況更新・通知送信など当日運営向けの限定操作 |
 
-認証は JWT ベースの HTTPOnly Cookie（`db_session` / `admin_operator`）で管理します。
+認証は JWT ベースの HTTPOnly Cookie（`db_session` / `admin_session`）で管理します。
 
 ---
 
@@ -27,10 +27,12 @@
 | ブース管理 | `/db/booth` | ブースの作成・編集・削除（クラス/部活/飲食/有志/委員会） |
 | イベント管理 | `/db/event` | タイムテーブルの作成・編集・遅延設定 |
 | お知らせ管理 | `/db/notice` | 通知の作成・編集・削除 |
-| 飲食管理 | `/db/eat` | キッチンカー・PTAバザーのメニュー・価格設定 |
+| 飲食管理 | `/db/eat` | キッチンカー・PTAバザーのメニュー・価格・商品画像設定 |
 | マップ設定 | `/db/map` | フロアマップ画像 URL の更新 |
-| ファイル設定 | `/db/files` | デジタルパンフレット PDF URL の更新 |
+| ファイル設定 | `/db/files` | デジタルパンフレット PDF URL の更新・値クリア |
 | 設定管理 | `/db/config` | システム設定（Bluetooth baseline 等） |
+| 機能 ON/OFF | `/db/features` | viewer・admin の各機能をトグルスイッチで制御 |
+| アカウント管理 | `/db/accounts` | 運営オペレーターアカウントの有効/無効を一括制御 |
 | 変更ログ | `/db/changelog` | 全操作の変更履歴を閲覧 |
 
 ### 運営オペレーター（`/admin/*`）
@@ -66,24 +68,31 @@
 # Firebase Admin SDK
 FIREBASE_SERVICE_ACCOUNT_JSON={"type":"service_account",...}
 
-# DB管理者認証
-DB_ADMIN_PASSWORD=your_db_admin_password
-DB_SESSION_SECRET=your_jwt_secret
+# JWT署名鍵（運営オペレーター・DB管理者共通）
+# 生成: openssl rand -base64 32
+SESSION_SECRET=your_jwt_secret_32chars_or_more
 
-# 運営オペレーター認証（JSON: {"id": "password", ...}）
-ADMIN_PASSWORDS={"operatorId":"password"}
-ADMIN_OPERATOR_SECRET=your_operator_jwt_secret
+# DB管理者認証
+DB_ADMIN_ID=your_db_admin_id
+DB_ADMIN_PW=your_db_admin_password
+DB_ADMIN_PIN=1234   # 任意。未設定時はPINステージをスキップ
+
+# 運営オペレーター認証（JSON: {"スコープ名": "パスワード", ...}）
+ADMIN_PASSWORDS={"実行委員":"password","教員":"password"}
 
 # Viewer on-demand ISR 無効化
 VIEWER_REVALIDATE_URL=https://your-viewer.vercel.app/api/revalidate
-VIEWER_REVALIDATE_SECRET=your_secret_here
+REVALIDATE_SECRET=your_secret_here   # viewer の REVALIDATE_SECRET と同一値
 
 # Bluetooth 混雑データ受信 API
-BLUETOOTH_API_SECRET=your_bluetooth_secret
+BLUETOOTH_SECRET=your_bluetooth_secret
+
+# Firebase Realtime Database（変更ログ用）
+FIREBASE_DATABASE_URL=https://your-project-default-rtdb.firebaseio.com
 ```
 
-> `VIEWER_REVALIDATE_URL` / `VIEWER_REVALIDATE_SECRET` は通知作成・更新・削除時に  
-> Viewer 側の ISR キャッシュを即時無効化するために使用します。未設定の場合はスキップされます。
+> `VIEWER_REVALIDATE_URL` / `REVALIDATE_SECRET` は通知・ブース・イベント更新時に  
+> Viewer 側の ISR キャッシュを即時無効化するために使用します。
 
 ---
 

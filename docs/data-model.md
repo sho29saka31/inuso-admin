@@ -96,6 +96,66 @@ Bluetooth 計測の設定パラメータを管理します。
 
 ---
 
+### ドキュメント: `config/viewer_features`
+
+inuso-viewer の各機能フラグを管理します。DB管理者画面 `/db/features` から変更します。
+
+| フィールド | 型 | 説明 | デフォルト |
+|---|---|---|---|
+| `service` | boolean | Viewer サービス全体の公開 | `true` |
+| `event` | boolean | イベントスケジュール機能 | `true` |
+| `booth` | boolean | ブース一覧機能 | `true` |
+| `busy` | boolean | 混雑状況機能 | `true` |
+| `eat` | boolean | 飲食エリア機能 | `true` |
+| `notice` | boolean | お知らせ機能 | `true` |
+| `digital` | boolean | デジタルパンフレット機能 | `true` |
+| `map` | boolean | 校内マップ機能 | `true` |
+
+> `service: false` にすると viewer 全ページがメンテナンス画面に切り替わります。
+
+---
+
+### ドキュメント: `config/admin_features`
+
+inuso-admin の各機能フラグを管理します。DB管理者画面 `/db/features` から変更します。
+
+| フィールド | 型 | 説明 | デフォルト |
+|---|---|---|---|
+| `service` | boolean | Admin サービス全体の公開 | `true` |
+| `notice` | boolean | お知らせ管理機能 | `true` |
+| `booth` | boolean | ブース管理機能 | `true` |
+| `event` | boolean | イベント管理機能 | `true` |
+| `eat` | boolean | 飲食ブース管理機能 | `true` |
+
+---
+
+### ドキュメント: `config/admin_accounts`
+
+運営オペレーターアカウントの有効/無効状態を管理します。DB管理者画面 `/db/accounts` から変更します。
+
+```json
+{
+  "1-1": true,
+  "eスポーツ部": false
+}
+```
+
+- キーはスコープ名、値は有効状態（`true` = 有効、`false` = 無効）
+- **未登録のスコープは有効（`true`）扱い**
+- `false` に設定するとログイン時に 401 を返す
+
+---
+
+### ドキュメント: `config/map`
+
+viewer のマップページで表示するフロアマップ画像 URL を管理します。
+
+| フィールド | 型 | 説明 |
+|---|---|---|
+| `imageUrl` | string | フロアマップ画像の URL |
+
+---
+
 ## Realtime Database (RTDB)
 
 ### ノード: `changeLogs/{targetId}/{logId}`
