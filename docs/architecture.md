@@ -188,3 +188,17 @@ sequenceDiagram
 | `"eスポーツ部"` / `"美術部"` / `"有志発表"` | 部活担当 | 担当ブースのみ、通知は `all` のみ |
 | `"キッチンカー"` / `"PTAバザー"` | 飲食担当 | 担当ブースのみ、通知は `all` のみ |
 | `"保健委員会"` | 委員会担当 | 担当ブースのみ、通知は `all` のみ |
+
+## 機能 ON/OFF システム
+
+Firestore `config` コレクションで viewer・admin の各機能を管理します。
+
+| Firestore ドキュメント | 制御対象 |
+|---|---|
+| `config/viewer_features` | inuso-viewer の各機能（service/event/booth/busy/eat/notice/digital/map） |
+| `config/admin_features` | inuso-admin の各機能（service/notice/booth/event/eat） |
+| `config/admin_accounts` | 運営オペレーターアカウントの有効/無効 |
+
+- DB管理者画面 `/db/features` からトグルスイッチで制御
+- フラグ変更時に `revalidateViewer()` で ISR キャッシュを即時更新
+- `viewer_features.service: false` → viewer 全ページがメンテナンス画面に切替
