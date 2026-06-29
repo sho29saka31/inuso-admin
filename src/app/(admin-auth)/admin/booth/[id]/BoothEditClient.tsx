@@ -5,16 +5,36 @@ import { useRouter } from "next/navigation";
 import LoadingOverlay from "@/components/LoadingOverlay";
 
 const STATUS_LABELS = ["停止中", "非常に閑散", "閑散", "通常", "混雑", "非常に混雑"];
+const STATUS_COLORS = ["text-gray-500", "text-blue-500", "text-green-500", "text-yellow-600", "text-orange-500", "text-red-500"];
 
 export function BoothEditClient({ booth }: { booth: Record<string, unknown> }) {
   const router = useRouter();
   const name = (booth.name ?? booth.shopName) as string;
-  const [status, setStatus] = useState(Number(booth.status ?? 3));
+
+  const initialStatus = Number(booth.status ?? 3);
+  const [status, setStatus] = useState(initialStatus);
+  const [prevNonZeroStatus, setPrevNonZeroStatus] = useState(initialStatus === 0 ? 3 : initialStatus);
   const [waitCount, setWaitCount] = useState(Number(booth.waitCount ?? 0));
   const [isManual, setIsManual] = useState(Boolean(booth.isManual ?? false));
   const [confirming, setConfirming] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+
+  const isStopped = status === 0;
+
+  function handleStopToggle() {
+    if (isStopped) {
+      setStatus(prevNonZeroStatus);
+    } else {
+      setPrevNonZeroStatus(status);
+      setStatus(0);
+    }
+  }
+
+  function handleSliderChange(val: number) {
+    setStatus(val);
+    setPrevNonZeroStatus(val);
+  }
 
   async function handleSave() {
     setSaving(true);
@@ -42,6 +62,7 @@ export function BoothEditClient({ booth }: { booth: Record<string, unknown> }) {
       <h1 className="text-xl font-bold">{name}</h1>
 
       <div className="flex flex-col gap-4">
+        {/* 更新モード */}
         <div className="flex items-center justify-between rounded-xl border p-4 bg-white">
           <div className="flex flex-col gap-0.5">
             <span className="text-sm font-medium">更新モード</span>
@@ -66,28 +87,65 @@ export function BoothEditClient({ booth }: { booth: Record<string, unknown> }) {
           </button>
         </div>
 
-        <div className="flex flex-col gap-2">
-          <label className="text-sm font-medium">混雑状態</label>
-          <select
-            value={status}
-            onChange={(e) => setStatus(Number(e.target.value))}
-            className="border rounded-lg px-3 py-2 text-sm"
+        {/* 停止トグル */}
+        <div className={`flex items-center justify-between rounded-xl border p-4 bg-white transition-opacity ${!isManual ? "opacity-40 pointer-events-none" : ""}`}>
+          <div className="flex flex-col gap-0.5">
+            <span className="text-sm font-medium">停止</span>
+            <span className="text-xs text-text-sub">
+              {isStopped ? "停止中（status: 0）" : "通常営業中"}
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={handleStopToggle}
+            disabled={!isManual}
+            className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ${
+              isStopped ? "bg-gray-400" : "bg-gray-200"
+            }`}
+            role="switch"
+            aria-checked={isStopped}
           >
-            {STATUS_LABELS.map((label, i) => (
-              <option key={i} value={i}>
-                {i} — {label}
-              </option>
-            ))}
-          </select>
+            <span
+              className={`inline-block h-5 w-5 rounded-full bg-white shadow transition-transform duration-200 ${
+                isStopped ? "translate-x-5" : "translate-x-0"
+              }`}
+            />
+          </button>
         </div>
 
-        <div className="flex flex-col gap-2">
+        {/* 混雑状態スライダー */}
+        <div className={`flex flex-col gap-3 rounded-xl border p-4 bg-white transition-opacity ${(!isManual || isStopped) ? "opacity-40 pointer-events-none" : ""}`}>
+          <div className="flex items-center justify-between">
+            <label className="text-sm font-medium">混雑状態</label>
+            <span className={`text-sm font-bold ${STATUS_COLORS[status]}`}>
+              {STATUS_LABELS[status]}
+            </span>
+          </div>
+          <input
+            type="range"
+            min={1}
+            max={5}
+            value={isStopped ? prevNonZeroStatus : status}
+            onChange={(e) => handleSliderChange(Number(e.target.value))}
+            disabled={!isManual || isStopped}
+            className="w-full accent-primary"
+          />
+          <div className="flex justify-between text-xs text-text-sub">
+            <span>閑散</span>
+            <span>通常</span>
+            <span>混雑</span>
+          </div>
+        </div>
+
+        {/* 待ち組数 */}
+        <div className={`flex flex-col gap-2 rounded-xl border p-4 bg-white transition-opacity ${!isManual ? "opacity-40 pointer-events-none" : ""}`}>
           <label className="text-sm font-medium">待ち組数</label>
           <div className="flex items-center gap-4">
             <button
               type="button"
               onClick={() => setWaitCount((v) => Math.max(0, v - 1))}
-              className="w-10 h-10 rounded-lg border text-lg font-bold flex items-center justify-center"
+              disabled={!isManual}
+              className="w-10 h-10 rounded-lg border text-lg font-bold flex items-center justify-center disabled:opacity-40"
             >
               −
             </button>
@@ -95,7 +153,8 @@ export function BoothEditClient({ booth }: { booth: Record<string, unknown> }) {
             <button
               type="button"
               onClick={() => setWaitCount((v) => v + 1)}
-              className="w-10 h-10 rounded-lg border text-lg font-bold flex items-center justify-center"
+              disabled={!isManual}
+              className="w-10 h-10 rounded-lg border text-lg font-bold flex items-center justify-center disabled:opacity-40"
             >
               ＋
             </button>
