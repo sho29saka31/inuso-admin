@@ -21,6 +21,7 @@ const SCOPE_TO_BOOTH_ID: Record<string, string> = {
   "eスポーツ部": "club-game",
   "美術部": "club-art",
   "有志発表": "pe-gym",
+  "保健委員会": "health",
 };
 
 function boothMatchesScope(booth: Record<string, unknown>, scope: string): boolean {
