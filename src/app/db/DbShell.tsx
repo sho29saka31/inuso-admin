@@ -12,6 +12,7 @@ const NAV_ITEMS = [
   { href: "/db/eat", label: "飲食" },
   { href: "/db/notice", label: "通知" },
   { href: "/db/files", label: "ファイル" },
+  { href: "/db/bluetooth", label: "Bluetooth" },
   { href: "/db/config", label: "設定" },
   { href: "/db/features", label: "機能ON/OFF" },
   { href: "/db/accounts", label: "アカウント" },

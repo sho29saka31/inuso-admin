@@ -1,6 +1,5 @@
 export const dynamic = "force-dynamic";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { getDb } from "@/lib/firebase-admin";
 import { getAdminScope } from "@/lib/admin-auth";
 import { isFullAccess, getScopeLabel } from "@/lib/admin-scope";
@@ -61,14 +60,6 @@ export default async function AdminMyBoothPage() {
 
   const booths = await getBooths(scope);
 
-  // クラス・部活・委員会の限定アクセス担当者は編集ページに直接リダイレクト
-  if (!isFullAccess(scope) && booths && booths.length === 1) {
-    const b = booths[0];
-    if ((b.category as string) !== "eat") {
-      redirect(`/admin/booth/${b.boothId as string}`);
-    }
-  }
-
   return (
     <div className="flex flex-col gap-4">
       <div>
@@ -95,9 +86,10 @@ export default async function AdminMyBoothPage() {
               ? `/admin/eat/${b.boothId}`
               : `/admin/booth/${b.boothId}`;
             return (
-              <div
+              <Link
                 key={b.boothId as string}
-                className="bg-white rounded-xl border p-4 flex items-center justify-between gap-4"
+                href={editPath}
+                className="bg-white rounded-xl border p-4 flex items-center justify-between gap-4 active:bg-gray-50"
               >
                 <div className="flex flex-col gap-1 min-w-0">
                   <span className="font-medium text-sm truncate">
@@ -119,13 +111,10 @@ export default async function AdminMyBoothPage() {
                     )}
                   </div>
                 </div>
-                <Link
-                  href={editPath}
-                  className="shrink-0 text-xs px-3 py-1.5 rounded-lg border border-primary text-primary font-medium"
-                >
-                  編集
-                </Link>
-              </div>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 text-text-sub">
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </Link>
             );
           })}
         </div>
