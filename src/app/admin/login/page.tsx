@@ -49,8 +49,8 @@ const SCOPE_GROUPS = [
   {
     group: "その他",
     items: [
-      { value: "キッチンカー", label: "キッチンカー" },
-      { value: "PTAバザー", label: "PTAバザー" },
+      { value: "eat-car", label: "キッチンカー" },
+      { value: "pta-bazaar", label: "PTAバザー" },
       { value: "保健委員会", label: "保健委員会" },
     ],
   },

@@ -26,8 +26,8 @@ const SCOPE_TO_BOOTH_ID: Record<string, string> = {
 
 function boothMatchesScope(booth: Record<string, unknown>, scope: string): boolean {
   if (isFullAccess(scope)) return true;
-  if (scope === "キッチンカー") return (booth.type as string) === "car";
-  if (scope === "PTAバザー") return (booth.type as string) === "pta";
+  if (scope === "eat-car") return (booth.type as string) === "car";
+  if (scope === "pta-bazaar") return (booth.type as string) === "pta";
   const targetId = SCOPE_TO_BOOTH_ID[scope];
   if (targetId) return (booth.boothId as string) === targetId;
   // Firestoreのscopeフィールドでフォールバック照合

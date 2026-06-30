@@ -15,8 +15,8 @@ const SCOPE_TO_BOOTH_ID: Record<string, string> = {
 };
 
 function isBoothAllowed(boothData: Record<string, unknown>, boothId: string, scope: string): boolean {
-  if (scope === "キッチンカー") return (boothData.type as string) === "car";
-  if (scope === "PTAバザー") return (boothData.type as string) === "pta";
+  if (scope === "eat-car") return (boothData.type as string) === "car";
+  if (scope === "pta-bazaar") return (boothData.type as string) === "pta";
   const mappedId = SCOPE_TO_BOOTH_ID[scope];
   if (mappedId) return mappedId === boothId;
   return (boothData.scope as string | undefined) === scope;
