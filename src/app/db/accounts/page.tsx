@@ -3,7 +3,6 @@ import { getDb, nowTimestamp } from "@/lib/firebase-admin";
 import { revalidatePath } from "next/cache";
 import { saveChangeLog } from "@/lib/changelog";
 import { verifySession } from "@/lib/auth";
-import { getScopeLabel } from "@/lib/admin-scope";
 import { ToggleButton, BulkButton } from "./ToggleButton";
 
 async function getAccountStatuses(): Promise<Record<string, boolean>> {
@@ -112,7 +111,7 @@ export default async function AccountsPage() {
           const enabled = statuses[scope] !== false;
           return (
             <div key={scope} className="flex items-center justify-between px-4 py-3 border-b last:border-b-0 bg-white">
-              <span className="text-sm font-medium">{getScopeLabel(scope)}</span>
+              <span className="text-sm font-medium">{scope}</span>
               <form action={toggleAccount}>
                 <input type="hidden" name="scope" value={scope} />
                 <input type="hidden" name="enabled" value={enabled ? "false" : "true"} />
