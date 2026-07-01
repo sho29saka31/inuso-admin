@@ -136,6 +136,7 @@ ADMIN_OPERATOR_PASSWORD         # Operator login password
 BLUETOOTH_SECRET                # Bearer token for Bluetooth API
 VIEWER_REVALIDATE_URL           # Viewer app revalidation endpoint (optional)
 VIEWER_REVALIDATE_SECRET        # Viewer revalidation secret (optional)
+CRON_SECRET                     # Bearer token verifying Vercel Cron requests (/api/cron/*)
 ```
 
 ## Branch Strategy
