@@ -27,18 +27,41 @@ function calcStatus(boothId: string, deviceCount: number, baselineMax?: number):
   return 5;
 }
 
-export async function POST(req: NextRequest) {
-  const authHeader = req.headers.get("authorization") ?? "";
-  const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
-  const btSecret = process.env.BLUETOOTH_SECRET;
-  if (!btSecret || !token || !safeCompare(token, btSecret)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+// BLUETOOTH_SECRET が {boothId: token} のJSONマップならブースごとのトークンを、
+// 単一文字列なら全ブース共通トークン（後方互換）を、照合対象として返す。
+function resolveExpectedToken(boothId: string | undefined): string | null {
+  const raw = process.env.BLUETOOTH_SECRET;
+  if (!raw) return null;
+  const trimmed = raw.trim();
+  if (trimmed.startsWith("{")) {
+    try {
+      const map = JSON.parse(trimmed) as Record<string, unknown>;
+      const t = boothId ? map[boothId] : undefined;
+      return typeof t === "string" && t.length > 0 ? t : null;
+    } catch {
+      // JSONとして壊れている場合は単一トークンとして扱う
+      return raw;
+    }
   }
+  return raw;
+}
 
-  const body = await req.json() as Record<string, unknown>;
+export async function POST(req: NextRequest) {
+  const body = (await req.json().catch(() => null)) as Record<string, unknown> | null;
+  if (!body) {
+    return NextResponse.json({ error: "invalid JSON" }, { status: 400 });
+  }
   const boothId = typeof body.boothId === "string" ? body.boothId : undefined;
   const deviceCount = typeof body.deviceCount === "number" ? body.deviceCount : undefined;
   const operatorId = typeof body.operatorId === "string" ? body.operatorId : undefined;
+
+  // 認証（per-boothトークン対応）: boothId に対応するトークンと Bearer を照合
+  const authHeader = req.headers.get("authorization") ?? "";
+  const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
+  const expected = resolveExpectedToken(boothId);
+  if (!expected || !token || !safeCompare(token, expected)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
   if (!boothId || deviceCount === undefined) {
     return NextResponse.json({ error: "boothId and deviceCount required" }, { status: 400 });
