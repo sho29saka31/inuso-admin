@@ -21,22 +21,35 @@ Surface Go 2
 
 ### `POST /api/booth/bluetooth`
 
-**認証:** `Authorization: Bearer <BLUETOOTH_SECRET>`
+**認証:** `Authorization: Bearer <トークン>`
+
+トークンは **per-booth（ブースごとに異なる）方式**に対応しています。サーバー側の環境変数
+`BLUETOOTH_SECRET` の内容によって照合方法が切り替わります。
+
+| `BLUETOOTH_SECRET` の形式 | 照合方法 |
+|---|---|
+| `{ "boothId": "token", ... }` のJSONマップ | リクエストの `boothId` に対応するトークン（`map[boothId]`）と Bearer を照合 |
+| 単一文字列（旧方式・後方互換） | 全ブース共通トークンとして Bearer を照合 |
+
+- スキャナ側の `booth_tokens.json`（`{boothId: token}`）と**同じ内容**をサーバーの `BLUETOOTH_SECRET` に設定すると、ブース単位のトークン照合になります。
+- 照合はタイミングセーフ比較。未設定・トークン不一致・`boothId` がマップに未登録 → **401**。
 
 **リクエスト:**
 ```json
 {
-  "boothId": "booth-001",
+  "boothId": "class1-1",
   "deviceCount": 12,
-  "operatorId": "bt-surface-01"
+  "operatorId": "bt-class1-1",
+  "macAddresses": ["<擬似ID>", "..."]
 }
 ```
 
 | フィールド | 型 | 必須 | 説明 |
 |---|---|---|---|
 | `boothId` | string | ✅ | Firestore の `booths/{boothId}` ドキュメント ID |
-| `deviceCount` | number | ✅ | スキャンで検出したデバイス数 |
-| `operatorId` | string | — | 変更ログに記録する送信元識別子（例: `"bt-surface-01"`） |
+| `deviceCount` | number | ✅ | スキャンで検出したデバイス数（**JSON 数値型**であること） |
+| `operatorId` | string | — | 変更ログに記録する送信元識別子。省略時は `bt-<boothId>` |
+| `macAddresses` | string[] | — | 受信するが**サイト側は未使用**（`deviceCount` のみ参照） |
 
 **レスポンス（成功）:**
 ```json
@@ -50,7 +63,10 @@ Surface Go 2
 
 **レスポンス（エラー）:**
 ```json
-{ "error": "booth not found", "boothId": "booth-001" }
+{ "error": "booth not found", "boothId": "class1-1" }   // 400: ブース未登録
+{ "error": "boothId and deviceCount required" }          // 400: 必須欠落
+{ "error": "invalid JSON" }                              // 400: ボディ不正
+{ "error": "Unauthorized" }                              // 401: 認証失敗
 ```
 
 ---
@@ -136,9 +152,9 @@ POST /api/booth/bluetooth 受信
 
 | 設定項目 | 値 |
 |---|---|
-| API URL | `https://your-admin.vercel.app/api/booth/bluetooth` |
-| Bearer トークン | `BLUETOOTH_SECRET` 環境変数と同じ値 |
-| ブース ID | Firestore の `booths` コレクションのドキュメント ID |
+| API URL | `https://inuso-admin.vercel.app/api/booth/bluetooth` |
+| Bearer トークン | 各ブースの per-booth トークン（`booth_tokens.json` の `map[boothId]`）。サーバーの `BLUETOOTH_SECRET` に同じ JSON を設定 |
+| ブース ID | Firestore の `booths` コレクションのドキュメント ID（下記一覧・要確認） |
 
 ### 送信間隔の推奨値
 
@@ -148,13 +164,33 @@ POST /api/booth/bluetooth 受信
 ### 動作テスト（curl）
 
 ```bash
-curl -X POST https://your-admin.vercel.app/api/booth/bluetooth \
-  -H "Authorization: Bearer YOUR_BLUETOOTH_SECRET" \
+curl -X POST https://inuso-admin.vercel.app/api/booth/bluetooth \
+  -H "Authorization: Bearer <そのブースのトークン>" \
   -H "Content-Type: application/json" \
-  -d '{"boothId":"booth-001","deviceCount":10,"operatorId":"test"}'
+  -d '{"boothId":"class1-1","deviceCount":10,"operatorId":"bt-class1-1"}'
 ```
 
 期待レスポンス: `{"ok":true,"status":3}`
+
+---
+
+## boothId 一覧（Firestore ドキュメントID）
+
+送信する `boothId` は Firestore `booths` のドキュメントIDと**完全一致**が必要（不一致は 400 `booth not found`）。
+per-booth トークン方式では、`booth_tokens.json` のキーもこの boothId に揃える必要があります。
+
+| 区分 | boothId |
+|---|---|
+| クラス（12） | `class1-1`〜`class1-4` / `class2-1`〜`class2-4` / `class3-1`〜`class3-4` |
+| 部活 | `club-art`（美術部） / `club-game`（eスポーツ部）※下記要確認 |
+| 委員会・有志 | `health`（保健委員会） / `pe-gym`（有志発表） |
+| 飲食 | `eat-car-1` / `eat-car-2` / `eat-car-3` / `pta-bazaar` |
+
+### 要確認（Bluetooth 開発側との突き合わせ）
+
+- **eスポーツ部の boothId**: サイト側コードは `club-game` を Firestore ドキュメントIDとして扱う箇所があります。一方 Bluetooth 側の `booth_tokens.json` は `club-esports` をキーにしています。**実際の Firestore ドキュメントIDに合わせて、トークンマップのキーと送信 `boothId` を統一**してください（不一致だと per-booth トークン照合に失敗して 401、または 400 `booth not found`）。
+- 飲食IDは旧 `eat-1`〜`eat-4` から `eat-car-1/2/3`・`pta-bazaar` へ移行済み（サイト側コードは対応済み。Firestore ドキュメントIDの実移行が前提）。
+- `macAddresses` は現状サイト側で未使用（送信自体は問題なし）。
 
 ---
 
