@@ -49,12 +49,13 @@ async function saveFeatures(docId: string, formData: FormData, keys: string[]) {
   revalidatePath("/db/features");
 }
 
-const VIEWER_KEYS = ["service", "event", "booth", "busy", "eat", "notice", "digital", "map"];
+// ブース一覧は混雑ページ（busy）に統合済みのため、viewer の booth トグルは廃止。
+// 統合後のページは busy トグルで制御する。
+const VIEWER_KEYS = ["service", "event", "busy", "eat", "notice", "digital", "map"];
 const VIEWER_LABELS: Record<string, string> = {
   service: "【サービス全体】Viewerを公開する",
   event: "イベントスケジュール",
-  booth: "ブース一覧",
-  busy: "混雑状況",
+  busy: "混雑・ブース一覧",
   eat: "飲食エリア",
   notice: "お知らせ",
   digital: "デジタルパンフレット",
