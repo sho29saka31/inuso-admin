@@ -3,6 +3,7 @@ import { getDb, nowTimestamp } from "@/lib/firebase-admin";
 import { saveChangeLog } from "@/lib/changelog";
 import { sendAdminNotification } from "@/lib/fcm-notify";
 import { safeCompare } from "@/lib/safe-compare";
+import { checkAndSendStaleAlerts } from "@/lib/stale-alert";
 
 // C-3 ハイブリッド型混雑レベル算出
 const deviceHistory: Map<string, number[]> = new Map();
@@ -104,6 +105,8 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify({ secret: viewerSecret, paths: ["/busy", "/booth"] }),
     }).catch(() => {});
   }
+
+  await checkAndSendStaleAlerts().catch((err) => console.error("stale alert check error:", err));
 
   return NextResponse.json({ ok: true, status });
 }
