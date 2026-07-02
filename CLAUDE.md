@@ -69,8 +69,7 @@ src/
 │       ├── notice/send/          # POST — create notice + FCM push
 │       ├── notice/update/        # POST — update notice
 │       ├── notice/delete/        # POST — delete notice
-│       ├── revalidate/           # POST — ISR cache invalidation
-│       └── vercel-webhook/       # POST — Vercel deploy webhook → Discord notification
+│       └── revalidate/           # POST — ISR cache invalidation
 ├── components/
 │   ├── ConfirmDialog.tsx         # Modal confirmation dialog
 │   └── LoadingOverlay.tsx        # Full-screen loading spinner
@@ -137,8 +136,6 @@ ADMIN_OPERATOR_PASSWORD         # Operator login password
 BLUETOOTH_SECRET                # Bearer token for Bluetooth API
 VIEWER_REVALIDATE_URL           # Viewer app revalidation endpoint (optional)
 VIEWER_REVALIDATE_SECRET        # Viewer revalidation secret (optional)
-VERCEL_WEBHOOK_SECRET           # Signing secret from Vercel Deployment Webhook (optional)
-DISCORD_WEBHOOK_URL             # Discord channel webhook URL for deploy notifications (optional)
 ```
 
 ## Branch Strategy
