@@ -1,0 +1,55 @@
+name: Discord Deploy Notify
+
+# Vercelのアカウント/チームWebhooks機能はPro以上限定のため、
+# 代わりにVercelのGitHub連携が作成する GitHub Deployment/Deployment status
+# イベントを利用してDiscordへ通知する（無料プランで利用可能）。
+on:
+  deployment_status:
+
+jobs:
+  notify:
+    if: github.event.deployment.creator.login == 'vercel[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        with:
+          script: |
+            const state = context.payload.deployment_status.state;
+            const notifyStates = ["success", "failure", "error", "in_progress"];
+            if (!notifyStates.includes(state)) return;
+
+            const colorByState = {
+              success: 0x2ecc71,
+              failure: 0xe74c3c,
+              error: 0xe74c3c,
+              in_progress: 0x3498db,
+            };
+
+            const env = context.payload.deployment.environment;
+            const url = context.payload.deployment_status.environment_url || context.payload.deployment.payload?.web_url || "";
+            const repo = context.payload.repository.full_name;
+
+            const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
+            if (!webhookUrl) {
+              core.setFailed("DISCORD_WEBHOOK_URL secret is not set");
+              return;
+            }
+
+            const res = await fetch(webhookUrl, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                embeds: [{
+                  title: `${repo} — ${env} (${state})`,
+                  url: url || undefined,
+                  color: colorByState[state],
+                  timestamp: new Date().toISOString(),
+                }],
+              }),
+            });
+
+            if (!res.ok) {
+              core.setFailed(`Discord notify failed: ${res.status} ${await res.text()}`);
+            }
