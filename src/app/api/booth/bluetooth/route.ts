@@ -10,21 +10,31 @@ const deviceHistory: Map<string, number[]> = new Map();
 
 // baselineMax: 朝テストで計測した満員時のデバイス数（Firestoreから取得）
 // 未設定の場合はrolling windowの最大値をbaselineとして使用
-function calcStatus(boothId: string, deviceCount: number, baselineMax?: number): number {
+function calcStatus(
+  boothId: string,
+  deviceCount: number,
+  baselineMax?: number
+): { status: number; heatScore: number } {
   const history = deviceHistory.get(boothId) ?? [];
   history.push(deviceCount);
   if (history.length > 30) history.shift();
   deviceHistory.set(boothId, history);
 
   const baseline = baselineMax ?? (history.length > 0 ? Math.max(...history) : 20);
-  if (baseline === 0) return 1;
+  if (baseline === 0) return { status: 1, heatScore: 0 };
 
   const ratio = (deviceCount / baseline) * 100;
-  if (ratio <= 15) return 1;
-  if (ratio <= 35) return 2;
-  if (ratio <= 55) return 3;
-  if (ratio <= 75) return 4;
-  return 5;
+  // heatScore: 連続ヒートマップ用の0-100正規化スコア（ratioをそのままclampするだけ）
+  const heatScore = Math.max(0, Math.min(100, Math.round(ratio)));
+
+  let status: number;
+  if (ratio <= 15) status = 1;
+  else if (ratio <= 35) status = 2;
+  else if (ratio <= 55) status = 3;
+  else if (ratio <= 75) status = 4;
+  else status = 5;
+
+  return { status, heatScore };
 }
 
 // BLUETOOTH_SECRET が {boothId: token} のJSONマップならブースごとのトークンを、
@@ -100,11 +110,12 @@ export async function POST(req: NextRequest) {
 
   const baselineMax: number | undefined =
     typeof boothData.baselineMax === "number" ? boothData.baselineMax : undefined;
-  const status = calcStatus(boothId, Number(deviceCount), baselineMax);
+  const { status, heatScore } = calcStatus(boothId, Number(deviceCount), baselineMax);
 
   const now = nowTimestamp();
   const fields: Record<string, unknown> = {
     status,
+    heatScore,
     deviceCount: Number(deviceCount),
     updatedAt: now,
     lastBluetoothAt: now,
@@ -116,7 +127,7 @@ export async function POST(req: NextRequest) {
     targetCollection: "booths",
     targetId: boothId,
     changeType: "update",
-    changedFields: { status, deviceCount: Number(deviceCount) },
+    changedFields: { status, heatScore, deviceCount: Number(deviceCount) },
   });
 
   const viewerUrl = process.env.VIEWER_REVALIDATE_URL;
@@ -131,5 +142,5 @@ export async function POST(req: NextRequest) {
 
   await checkAndSendStaleAlerts().catch((err) => console.error("stale alert check error:", err));
 
-  return NextResponse.json({ ok: true, status });
+  return NextResponse.json({ ok: true, status, heatScore });
 }
